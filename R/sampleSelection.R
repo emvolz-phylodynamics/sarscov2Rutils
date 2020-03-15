@@ -154,6 +154,30 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, path_t
 	d3
 }
 
+#' Change the name of sequences to recognize numeric time of sampling and deme 
+#'
+#' @param path_to_algn A DNAbin alignment *or* a system path (type character) where original alignment can be found
+#' @param deme The name of the deme to add to the end of each label 
+#'
+#" @return DNAbin alignment 
+#' @export 
+prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL, deme = 'Il'  ){
+	if ( inherits( path_to_align, 'DNAbin' ) )
+		d = path_to_align
+	else
+		d = read.dna( path_to_align, format = 'fasta')
+	
+	sts <- sapply( strsplit( rownames(d), '\\|' ) , function(x){
+		decimal_date( ymd( tail(x,1)))
+	})
+	rownames(d) <- paste(sep='_', rownames(d), sts, deme )
+	
+	if ( !is.null( path_to_save ))
+		write.dna( d, file = path_to_save, format = 'fasta' )
+	
+	d
+}
+
 # debug 
 if (FALSE){
 	p0 = '/home/erikvolz/git/sarscov2-phylodynamics/gisaid/gisaid_cov2020_sequences_aligned_March14_noGaps.fasta'
