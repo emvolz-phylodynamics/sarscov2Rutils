@@ -1,0 +1,11 @@
+Package: sarscov2
+Type: Package
+Title: Scripts to support preparation and analysis of SARS CoV 2 analyses 
+Version: 0.0.1
+Date: 2020-03-15
+Author: Erik M Volz
+Maintainer: Erik M Volz <erik.volz@gmail.com>
+Description: Functions to filter and prepare special interest alignments and summarize beast analyses 
+Requires: ape,treedater(>=0.5.0),lubridate
+License: LGPL
+RoxygenNote: 7.1.0
