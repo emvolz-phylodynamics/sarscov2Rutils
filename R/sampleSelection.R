@@ -1,6 +1,3 @@
-library( ape ) 
-library( treedater )
-library( lubridate )
 
 
 #' Selects a background reference set of sequences with good quality  
@@ -20,6 +17,10 @@ library( lubridate )
 #' @export 
 filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, ... )
 {
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+
 	if ( inherits( path_to_align, 'DNAbin' ) )
 		d = path_to_align
 	else
@@ -80,6 +81,10 @@ filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.0
 #' @return A DNAbin alignment. Will also save to path_to_save 
 #' @export 
 time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+
 	if ( inherits( path_to_align, 'DNAbin' ) )
 		d = path_to_align
 	else
@@ -128,6 +133,10 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 #' @return A DNAbin alignment. Will also save to path_to_save 
 #' @export 
 region_time_stratified_sample <- function(region_regex, n, path_to_align, path_to_save = NULL ) {
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+
 	if ( inherits( path_to_align, 'DNAbin' ) )
 		d = path_to_align
 	else
@@ -158,25 +167,62 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, path_t
 #'
 #' @param path_to_algn A DNAbin alignment *or* a system path (type character) where original alignment can be found
 #' @param deme The name of the deme to add to the end of each label 
+#' @param regexprs A vector of regular expressions that can be used to match tip labels and categorize in to demes. These must include *all* sequcence IDs, and each ID should match at most one regular expression
+#' @param invert_regexpr A logical vector specifying if the i'th regular expression should be an inverse match 
+#' @param demes A character vector of deme names to be appended to corresponding sequence IDs 
 #'
 #" @return DNAbin alignment 
 #' @export 
-prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL, deme = 'Il'  ){
+#~ prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL, deme = 'Il'  ){
+prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL
+ , regexprs = c( '.*/Netherlands/.*', '.*/Netherlands/.*' ) 
+ , invert_regexpr = c( FALSE, TRUE )
+ , demes = c( 'Il'  , 'exog'  )
+ ){
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+	
 	if ( inherits( path_to_align, 'DNAbin' ) )
 		d = path_to_align
 	else
 		d = read.dna( path_to_align, format = 'fasta')
 	
+	sids = rownames(d) 
+	if ( length( regexprs ) != length( demes ))
+		stop('Must provide equal numbers of regex and deme names ') 
+	
+	demegroups = lapply( 1:length(demes), function(k) {
+		x = regexprs[k]
+		if ( invert_regexpr[k] ) {
+			return( sids[ !grepl( pattern = x , sids ) ] )
+		}else{
+			return( sids[ grepl( pattern = x , sids ) ] )
+		}
+	})
+	int <- do.call( intersect, demegroups )
+	uni = do.call( c, demegroups )
+	if ( length( int ) > 0 )
+		stop( 'Intersection of deme groups is non-empty. Each regex must match a unique set.' )
+	if ( length( uni ) < length(sids) ){
+		print( setdiff( sids, uni ))
+		stop( 'There were some sequence IDs that did not match a regex. ' )
+	}
+	
+	deme <- setNames( rep(demes[1], nrow(d)), sids )
+	for ( k in 1:length( demes )){
+		deme[ demegroups[[k]] ] <- demes[k]
+	}
+	
 	sts <- sapply( strsplit( rownames(d), '\\|' ) , function(x){
 		decimal_date( ymd( tail(x,1)))
 	})
 	rownames(d) <- paste(sep='_', rownames(d), sts, deme )
-	
 	if ( !is.null( path_to_save ))
 		write.dna( d, file = path_to_save, format = 'fasta' )
-	
 	d
 }
+
 
 # debug 
 if (FALSE){
@@ -185,4 +231,14 @@ if (FALSE){
 #~ 	o1 = time_stratified_sample( 50, o$alignment,  '/home/erikvolz/git/sarscov2-phylodynamics/gisaid/gisaid_cov2020_sequences_March14_aligned_filter0_tempsamp50.fas')
 	o1 = region_time_stratified_sample( '.*/Netherlands/.*' , 25, o$alignment,  '/home/erikvolz/git/sarscov2-phylodynamics/gisaid/gisaid_cov2020_sequences_aligned_March14_noGaps_filter0_netherlands.fas')
 	o1 = region_time_stratified_sample( '.*/USA/WA.*' , 25, o$alignment,  '/home/erikvolz/git/sarscov2-phylodynamics/gisaid/gisaid_cov2020_sequences_aligned_March14_noGaps_filter0_WA.fas')
+	
+		library( ape ) 
+	library( treedater )
+	library( lubridate )
+	o = prep_tip_labels_phydyn( '../gisaid_cov2020_sequences_aligned_March14_noGaps_filter0_netherlands.fas'
+	 , regexprs = c( '.*/Netherlands/.*', '.*/Netherlands/.*' ) 
+	 , demes = c( 'Il'  , 'exog'  )
+	 , path_to_save = 'tmp.fasta' 
+	)
+
 }

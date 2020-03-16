@@ -4,12 +4,24 @@
 \alias{prep_tip_labels_phydyn}
 \title{Change the name of sequences to recognize numeric time of sampling and deme}
 \usage{
-prep_tip_labels_phydyn(path_to_align, path_to_save = NULL, deme = "Il")
+prep_tip_labels_phydyn(
+  path_to_align,
+  path_to_save = NULL,
+  regexprs = c(".*/Netherlands/.*", ".*/Netherlands/.*"),
+  invert_regexpr = c(FALSE, TRUE),
+  demes = c("Il", "exog")
+)
 }
 \arguments{
-\item{deme}{The name of the deme to add to the end of each label}
+\item{regexprs}{A vector of regular expressions that can be used to match tip labels and categorize in to demes. These must include *all* sequcence IDs, and each ID should match at most one regular expression}
+
+\item{invert_regexpr}{A logical vector specifying if the i'th regular expression should be an inverse match}
+
+\item{demes}{A character vector of deme names to be appended to corresponding sequence IDs}
 
 \item{path_to_algn}{A DNAbin alignment *or* a system path (type character) where original alignment can be found}
+
+\item{deme}{The name of the deme to add to the end of each label}
 }
 \description{
 Change the name of sequences to recognize numeric time of sampling and deme
