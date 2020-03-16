@@ -217,13 +217,13 @@ prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL
 	sts <- sapply( strsplit( rownames(d), '\\|' ) , function(x){
 		decimal_date( ymd( tail(x,1)))
 	})
-	rownames(d) <- paste(sep='_', rownames(d), sts, deme )
+	rownames(d) <- paste(sep='|', rownames(d), sts, deme )
+	rownames(d) <- gsub( rownames(d), pattern = '\\s' , replacement = '_')
 	if ( !is.null( path_to_save ))
 		write.dna( d, file = path_to_save, format = 'fasta' )
 	d
 }
-
-
+	
 # debug 
 if (FALSE){
 	p0 = '/home/erikvolz/git/sarscov2-phylodynamics/gisaid/gisaid_cov2020_sequences_aligned_March14_noGaps.fasta'
