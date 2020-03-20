@@ -10,11 +10,16 @@ region_time_stratified_sample(
   region_regex,
   n,
   path_to_align,
+  nregion = NULL,
   path_to_save = NULL
 )
 }
 \arguments{
 \item{region_regex}{Sample names matching this regular expression will be retained and closest matches also retained}
+
+\item{n}{sample size from outside region}
+
+\item{nregion}{sample size within region; if null will include everything in region}
 
 \item{path_to_save}{Where to store (as fasta) the filtered alignment}
 

@@ -127,12 +127,14 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 #' @param region_regex Sample names matching this regular expression will be retained and closest matches also retained
 #" @param path_to_align A DNAbin alignment *or* a system path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
 #' @param path_to_save Where to store (as fasta) the filtered alignment
+#' @param n sample size from outside region 
+#' @param nregion sample size within region; if null will include everything in region
 #' @param q_threshold Clock outlier threshold 
 #' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
 #' 
 #' @return A DNAbin alignment. Will also save to path_to_save 
 #' @export 
-region_time_stratified_sample <- function(region_regex, n, path_to_align, path_to_save = NULL ) {
+region_time_stratified_sample <- function(region_regex, n, path_to_align, nregion = NULL,  path_to_save = NULL ) {
 	library( ape ) 
 	library( treedater )
 	library( lubridate )
@@ -144,6 +146,15 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, path_t
 	
 	dr = d[ grepl(pattern= region_regex, x = rownames(d) ) , ]
 	dnr = d[ setdiff( rownames(d), rownames(dr)), ]
+	
+	nr <- nrow(dr ) 
+	if (!is.null( nregion )){
+		if ( nregion < nr ){
+			#dr <- dr[ sample( rownames(dr), replace=FALSE, size = nregion), ]
+			dr <- time_stratified_sample(nregion, dr, path_to_save = NULL )$alignment
+		}
+	}
+	
 	D <- dist.dna( d, 'F84' , pairwise.deletion=TRUE )
 	Drnr <- as.matrix( D )[ rownames(dr), rownames(dnr ) ]
 	keep <- c()
