@@ -9,6 +9,7 @@ filter_quality0(
   path_to_save = NULL,
   q_threshold = 0.05,
   minEdge = 1/29000/10,
+  deduplicate_identical = TRUE,
   ...
 )
 }
@@ -18,6 +19,8 @@ filter_quality0(
 \item{q_threshold}{Clock outlier threshold}
 
 \item{minEdge}{minimum branch length (substitutions per site) to stabilize clock inference}
+
+\item{deduplicate_identical}{if TRUE, will only include one sequence (most recent) from among sets of identical sequences}
 }
 \value{
 Writes a new fasta aligment. Return value is a treedater tree and dnabin

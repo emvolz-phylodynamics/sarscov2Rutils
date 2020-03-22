@@ -1,4 +1,25 @@
 
+# prototytpe: does not work 
+.cutree_hclust <- function( D ){
+	D <- as.matrix(D)
+	g = -1
+	for ( k in 1:nrow(D)){
+		i <- which( D[k, ] == 0 )
+		#if ( length(i) > 0 ) browser()
+		{
+			D[i,i] <- g
+			g <- g - 1
+		}
+	}
+	D [ D > 0 ] <- 0
+	D <- abs(D) 
+	g <- abs(g) - 1
+	ct = apply( D, MAR=1, function( x ) max(unique(x)) )
+	ct
+}
+#~ readRDS('tmp.rds') -> D
+#~ ct = .cutree_hclust( D )
+
 
 #' Selects a background reference set of sequences with good quality  
 #'
@@ -12,10 +33,11 @@
 #' @param path_to_save Where to store (as fasta) the filtered alignment
 #' @param q_threshold Clock outlier threshold 
 #' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
+#' @param deduplicate_identical if TRUE, will only include one sequence (most recent) from among sets of identical sequences
 #'
 #' @return Writes a new fasta aligment. Return value is a treedater tree and dnabin
 #' @export 
-filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, ... )
+filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, deduplicate_identical=TRUE,  ... )
 {
 	library( ape ) 
 	library( treedater )
@@ -45,18 +67,38 @@ filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.0
 	d = d[keep, ]
 	
 	# remove outliers according to a strict molecular clock 
-	D <- dist.dna( d, 'F84', pairwise=TRUE)
+	D <- as.matrix( dist.dna( d, 'F84', pairwise=TRUE) )
 	sts <- sapply( strsplit( rownames(d), '\\|' ) , function(x){
 		decimal_date( ymd( tail(x,1)))
 	})
 	names(sts) <- rownames(d)
+	# deduplicate identical sequences if indicated 
+#~ browser()
+	if (deduplicate_identical){
+		drop <- c() 
+		ct = cutree( hclust( as.dist(D) ) , h = 1e-6  )
+		for ( k in unique( ct )){
+			s = names( ct )[ ct == k ]
+			if ( length( s ) > 1 ){
+				u = s[ which.max(sts[s])[1]  ]
+				drop <- c( drop , setdiff( s, u ) )
+			}
+		}
+		if ( length( drop  ) > 1 ){
+			keep <- setdiff( rownames(D), drop )
+			D <- D[keep, keep]
+			sts <- sts[ rownames(D)]
+		}
+	}
 	tr <- nj( D )
 	tr$edge.length <- pmax( tr$edge.length , minEdge)
-	td <- suppressWarnings( dater( unroot( tr ), sts, s = 29e3, omega0=.001, ... )  )
+	# treedater designed to be fast rather than accurate for outlier detection: 
+#~ browser()
+	td <- suppressWarnings( dater( unroot( tr ), sts, s = 29e3, omega0=.001, numStartConditions=1, maxit=1,meanRateLimits=c(.00099,.00101), ... )  )
 	ot0 = outlierTips(td) 
 	outs0 = as.character( ot0$taxon )[ ot0$q < q_threshold ]
 	tr1 <- unroot( drop.tip( tr, outs0 ) )
-	td1 <- suppressWarnings( dater( unroot( tr1 ), sts, s = 29e3, omega0 = .001, ...) )
+	#td1 <- suppressWarnings( dater( unroot( tr1 ), sts, s = 29e3, omega0 = .001,numStartConditions=1, maxit=1,meanRateLimits=c(.00099,.00101),  ...) )
 	
 	d1 = d[ tr1$tip.label, ]
 	
@@ -66,8 +108,12 @@ filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.0
 	n1 <- Ntip( tr1 )
 	cat( paste('Removed', n0-n1, 'sequences.', n1, 'remaining. Aligment saved to', path_to_save, '\n') )
 	
-	list( alignment = d1, time_tree = td1 )
+	list( alignment = d1, time_tree = td )
 }
+#~ path_to_align = '../../../gisaid/gisaid_cov2020_sequences_aligned_March14_noGaps.fasta'
+#~ a = filter_quality0( path_to_align, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, deduplicate_identical=TRUE )
+
+
 
 #' Select a random sample from aligment stratified through time 
 #'
