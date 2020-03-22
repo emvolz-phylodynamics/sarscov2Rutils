@@ -2,9 +2,16 @@
 % Please edit documentation in R/combineAndSummarize0.R
 \name{SEIJR_reproduction_number}
 \alias{SEIJR_reproduction_number}
-\title{Compute R0 for the SEIJR.0.0 model}
+\title{Compute R0, growth rate and doubling time for the SEIJR.0.0 model}
 \usage{
-SEIJR_reproduction_number(X, gamma1 = 96, tau = 74, p_h = 0.2)
+SEIJR_reproduction_number(
+  X,
+  gamma0 = 89.042,
+  gamma1 = 96,
+  tau = 74,
+  p_h = 0.2,
+  precision = 3
+)
 }
 \arguments{
 \item{gamma1}{Rate of recovery (per capita per year)}
@@ -14,8 +21,8 @@ SEIJR_reproduction_number(X, gamma1 = 96, tau = 74, p_h = 0.2)
 \item{p_h}{Proportion in J}
 }
 \value{
-Vector of R0 values
+Data frame with tabulated results and CI
 }
 \description{
-Compute R0 for the SEIJR.0.0 model
+Also prints to the screen a markdown table with the results. This can be copied into reports.
 }
