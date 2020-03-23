@@ -2,6 +2,7 @@
 
 export(SEIJR_plot_size)
 export(SEIJR_reproduction_number)
+export(add_starting_trees_to_xml)
 export(combine_logs)
 export(combine_traj)
 export(filter_quality0)
