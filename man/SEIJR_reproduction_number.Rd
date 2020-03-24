@@ -4,25 +4,15 @@
 \alias{SEIJR_reproduction_number}
 \title{Compute R0, growth rate and doubling time for the SEIJR.0.0 model}
 \usage{
-SEIJR_reproduction_number(
-  X,
-  gamma0 = 89.042,
-  gamma1 = 96,
-  tau = 74,
-  p_h = 0.2,
-  precision = 3
-)
+SEIJR_reproduction_number(X, gamma0 = 89.042, gamma1 = 96, precision = 3)
 }
 \arguments{
 \item{gamma1}{Rate of recovery (per capita per year)}
-
-\item{tau}{Transm rate increase in J}
-
-\item{p_h}{Proportion in J}
 }
 \value{
 Data frame with tabulated results and CI
 }
 \description{
-Also prints to the screen a markdown table with the results. This can be copied into reports.
+Also prints to the screen a markdown table with the results. This can be copied into reports. 
+The tau & p_h parameters _must_ be in the log files. If that's not the case, you can add fixed values like this: X$seir.tau <- 74; X$seir.p_h <- .2
 }

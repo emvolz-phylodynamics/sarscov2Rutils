@@ -85,21 +85,21 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 #' Compute R0, growth rate and doubling time for the SEIJR.0.0 model 
 #'
 #' Also prints to the screen a markdown table with the results. This can be copied into reports. 
+#' The tau & p_h parameters _must_ be in the log files. If that's not the case, you can add fixed values like this: X$seir.tau <- 74; X$seir.p_h <- .2
 #'
 #" @param X a data frame with the posterior trace, can be produced by 'combine_logs' function
 #' @param gamma1 Rate of recovery (per capita per year)
-#' @param tau Transm rate increase in J 
-#' @param p_h Proportion in J 
 #' @return Data frame with tabulated results and CI 
 #' @export 
-SEIJR_reproduction_number <- function( X, gamma0 = 89.042, gamma1 = 96, tau = 74, p_h = 0.20 , precision =3 ) {
+SEIJR_reproduction_number <- function( X, gamma0 = 89.042, gamma1 = 96,precision =3 ) {
+	# tau = 74, p_h = 0.20 , 
 	cat( 'Double check that you have provided the correct gamma0 and gamma1 parameters\n' )
 	
-	Rs = ((1-p_h)*X$seir.b/gamma1 + tau*p_h*X$seir.b/gamma1) 
+	Rs = ((1-X$seir.p_h)*X$seir.b/gamma1 + X$seir.tau*X$seir.p_h*X$seir.b/gamma1) 
 	qR = signif( quantile( Rs, c(.5, .025, .975 )), precision )
 	
 	# growth rates 
-	beta = (1-p_h)*X$seir.b + p_h*tau*X$seir.b
+	beta = (1-X$seir.p_h)*X$seir.b + X$seir.p_h*X$seir.tau*X$seir.b
 	r = (-(gamma0 + gamma1) + sqrt( (gamma0-gamma1)^2 + 4*gamma0*beta )) / 2
 	qr =  signif( quantile( r/365, c( .5, .025, .975 )), precision ) # growth rate per day 
 	
@@ -118,7 +118,7 @@ SEIJR_reproduction_number <- function( X, gamma0 = 89.042, gamma1 = 96, tau = 74
 	print( knitr::kable(O) )
 	O 
 }
-#~ SEIJR_reproduction_number( d) 
+
 
 
 #' Plot the cumulative infections through time from a SEIJR trajectory sample
