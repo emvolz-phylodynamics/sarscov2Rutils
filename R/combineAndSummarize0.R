@@ -104,7 +104,8 @@ SEIJR_reproduction_number <- function( X, gamma0 = 89.042, gamma1 = 96,precision
 	qr =  signif( quantile( r/365, c( .5, .025, .975 )), precision ) # growth rate per day 
 	
 	# double times 
-	dbl = 1 / (r /365)
+	dr = r / 365 
+	dbl = log(2) / dr 
 	qdbl  = signif( quantile( dbl, c( .5, .025, .975 )), precision ) # days 
 	
 	#cat ( 'R0\n')
