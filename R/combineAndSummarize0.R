@@ -187,6 +187,12 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 SEIJR_reproduction_number <- function( X, gamma0 = 73, gamma1 = 121.667,precision =3 ) {
 	# tau = 74, p_h = 0.20 , 
 	cat( 'Double check that you have provided the correct gamma0 and gamma1 parameters\n' )
+  
+  if(is.null(X$seir.tau))
+    X$seir.tau <- 74; 
+  
+  if(is.null(X$seir.p_h))
+    X$seir.p_h <- .2
 	
 	Rs = ((1-X$seir.p_h)*X$seir.b/gamma1 + X$seir.tau*X$seir.p_h*X$seir.b/gamma1) 
 	qR = signif( quantile( Rs, c(.5, .025, .975 )), precision )
