@@ -141,7 +141,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	
 	cat('\n\n')
 	cat( 'EFFECTIVE SAMPLE SIZES OF COMBINED LOGS\n')
-	print( as.data.frame( unlist( sapply( o$log, function(x) if(is.numeric( x )) coda::effectiveSize( x ) ) ) ) )
+	print( as.data.frame( unlist( sapply( X, function(x) if(is.numeric( x )) coda::effectiveSize( x ) ) ) ) )
 	cat('\n\n')
 	
 	# now combine traj 
