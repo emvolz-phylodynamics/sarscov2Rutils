@@ -419,20 +419,84 @@ SEIJR_plot_daily_inf <- function(trajdf
 	)
 }
 
-
-
-
-
-# debug 
-if (FALSE)
-{
-	X = combine_logs( logfns = 'nl5.log', burnProportion = .5 , ofn = 'tmp.rds' )
-	Y = combine_traj( trajfns = 'seir.nl5.traj', burnProportion = .50, ntraj = 200, ofn = 'tmptraj.rds' )
-	Z = SEIJR_reproduction_number( X, gamma1 = 96, tau = 74, p_h = 0.20  ) 
+#' Plot reproduction number through time from a SEIJR trajectory sample
+#'
+#" @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
+#' @param logdf Either a dataframe or a path to rds containing a data frame with posterior logs
+#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
+#' @param gamma0 rate of becoming infectious during incubation period
+#' @param gamma1 rate of recovery once infectious
+#' @param path_to_save Will save a png here 
+#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
+#' @export 
+SEIJR_plot_Rt <- function(trajdf
+  , logdf
+  , gamma0 = 73, gamma1 = 121.667
+  , date_limits = c( as.Date( '2020-02-01'), NA ) 
+  , path_to_save='Rt.png'
+  , ...
+) {
+	library( ggplot2 ) 
+	library( lubridate )
 	
-	O = SEIJR_plot_size(trajdf = 'tmptraj.rds'
-	  , case_data = NULL
-	  , date_limits = c( as.Date( '2020-02-01'), NA ) 
-	  , path_to_save='size.png')
+	if (!is.data.frame(trajdf)){
+		# assume this is path to a rds 
+		readRDS(trajdf) -> trajdf 
+	}
+	
+	if (!is.data.frame( logdf ))
+		X <- readRDS(logdf )
+	
+	dfs <- split( trajdf, trajdf$Sample )
+	taxis <- dfs[[1]]$t 
+	
+	s <- sapply( dfs, function(df) df$Sample[1] )
+	X1 <- X[match( s, X$Sample ), ]
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
 
+	qs <- c( .5, .025, .975 )
+	
+	Rs = ((1-X1$seir.p_h)*X1$seir.b/gamma1 + X1$seir.tau*X1$seir.p_h*X1$seir.b/gamma1)
+
+	# infectious
+	Il = do.call( cbind, lapply( dfs, '[[', 'Il' ))
+	Ih = do.call( cbind, lapply( dfs, '[[', 'Ih' ))
+	S = do.call( cbind, lapply( dfs, '[[', 'S' ))
+	E = do.call( cbind, lapply( dfs, '[[', 'E' ))
+	R = do.call( cbind, lapply( dfs, '[[', 'R' ))
+	I = Il + Ih 
+	pS <- S / ( S + E + I + R )
+	Rts = t(Rs * t(pS))
+	t(apply( Rts, MAR=1, FUN= function(x) quantile(na.omit(x), qs ))) -> Yci  
+	
+#~ browser()
+	#~ ------------
+	pldf <- data.frame( Date = ( date_decimal( taxis ) ) , reported=FALSE )
+	pldf$`R(t)` = Yci[,1]
+	pldf$`2.5%` = Yci[,2]
+	pldf$`97.5%` = Yci[,3] 
+	
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf ) + 
+	  geom_path( aes(x = Date, y = `R(t)` , group = !reported), lwd=1.25) + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`, group = !reported) , alpha = .25 ) 
+	
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Eff reproduction number through time' )  #+  scale_y_log10()
+	
+	if (!is.null(path_to_save))
+		ggsave(pl, file = path_to_save)
+	
+	list(
+	 plot = pl
+	  , taxis = taxis 
+	  , Il = Il
+	  , Ih = Ih
+	  , Rts
+	  , pldf =pldf 
+	)
 }
+
