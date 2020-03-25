@@ -180,6 +180,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 #' The tau & p_h parameters _must_ be in the log files. If that's not the case, you can add fixed values like this: X$seir.tau <- 74; X$seir.p_h <- .2
 #'
 #" @param X a data frame with the posterior trace, can be produced by 'combine_logs' function
+#' @param gamma0 Rate of leaving incubation period ( per capita per year )
 #' @param gamma1 Rate of recovery (per capita per year)
 #' @return Data frame with tabulated results and CI 
 #' @export 
@@ -322,7 +323,7 @@ SEIJR_plot_size <- function(trajdf
 #'
 #" @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
 #' @param logdf Either a dataframe or a path to rds containing a data frame with posterior logs
-#' @param case_data An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Cumulative'. Ensure Date is not a factor or character (see as.Date )
+#' @param case_data An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )
 #' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
 #' @param path_to_save Will save a png here 
 #' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 

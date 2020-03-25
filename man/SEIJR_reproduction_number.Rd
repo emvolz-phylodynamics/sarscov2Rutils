@@ -4,9 +4,11 @@
 \alias{SEIJR_reproduction_number}
 \title{Compute R0, growth rate and doubling time for the SEIJR.0.0 model}
 \usage{
-SEIJR_reproduction_number(X, gamma0 = 89.042, gamma1 = 96, precision = 3)
+SEIJR_reproduction_number(X, gamma0 = 73, gamma1 = 121.667, precision = 3)
 }
 \arguments{
+\item{gamma0}{Rate of leaving incubation period ( per capita per year )}
+
 \item{gamma1}{Rate of recovery (per capita per year)}
 }
 \value{

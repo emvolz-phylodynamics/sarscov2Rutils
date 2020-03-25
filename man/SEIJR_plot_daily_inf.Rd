@@ -16,7 +16,7 @@ SEIJR_plot_daily_inf(
 \arguments{
 \item{logdf}{Either a dataframe or a path to rds containing a data frame with posterior logs}
 
-\item{case_data}{An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Cumulative'. Ensure Date is not a factor or character (see as.Date )}
+\item{case_data}{An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )}
 
 \item{date_limits}{a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories}
 
