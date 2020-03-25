@@ -183,7 +183,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 #' @param gamma1 Rate of recovery (per capita per year)
 #' @return Data frame with tabulated results and CI 
 #' @export 
-SEIJR_reproduction_number <- function( X, gamma0 = 89.042, gamma1 = 96,precision =3 ) {
+SEIJR_reproduction_number <- function( X, gamma0 = 73, gamma1 = 121.667,precision =3 ) {
 	# tau = 74, p_h = 0.20 , 
 	cat( 'Double check that you have provided the correct gamma0 and gamma1 parameters\n' )
 	
