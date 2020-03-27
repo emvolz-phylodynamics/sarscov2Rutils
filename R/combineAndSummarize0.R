@@ -237,6 +237,7 @@ SEIJR_plot_size <- function(trajdf
   , case_data = NULL
   , date_limits = c( as.Date( '2020-02-01'), NA ) 
   , path_to_save='size.png'
+  , log_y_axis = F
   , ...
 ) {
 	library( ggplot2 ) 
@@ -304,6 +305,9 @@ SEIJR_plot_size <- function(trajdf
 	pl <- pl + theme_minimal()  + xlab('') + 
 	 ylab ('Cumulative estimated infections (ribbon) 
 	 Cumulative confirmed (points)' )  #+  scale_y_log10()
+	
+	if(log_y_axis == T)
+	  pl <- pl +  scale_y_log10()
 	
 	if (!is.null(path_to_save))
 		ggsave(pl, file = path_to_save)
@@ -463,7 +467,13 @@ SEIJR_plot_Rt <- function(trajdf
 	}
 	
 	if (!is.data.frame( logdf ))
-		X <- readRDS(logdf )
+		X <- readRDS(logdf ) else X <- logdf
+		
+		if(is.null(X$seir.tau))
+		  X$seir.tau <- 74; 
+		
+		if(is.null(X$seir.p_h))
+		  X$seir.p_h <- .2
 	
 	dfs <- split( trajdf, trajdf$Sample )
 	taxis <- dfs[[1]]$t 
