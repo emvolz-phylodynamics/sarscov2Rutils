@@ -341,6 +341,7 @@ SEIJR_plot_daily_inf <- function(trajdf
   , case_data = NULL
   , date_limits = c( as.Date( '2020-02-01'), NA ) 
   , path_to_save='daily.png'
+  , log_y_axis = F
   , ...
 ) {
 	library( ggplot2 ) 
@@ -418,6 +419,9 @@ SEIJR_plot_daily_inf <- function(trajdf
 	pl <- pl + theme_minimal()  + xlab('') + 
 	 ylab ('Estimated daily new infections (ribbon) 
 	 Daily confirmed cases (points)' )  #+  scale_y_log10()
+	
+	if(log_y_axis == T)
+	  pl <- pl +  scale_y_log10()
 	
 	if (!is.null(path_to_save))
 		ggsave(pl, file = path_to_save)
