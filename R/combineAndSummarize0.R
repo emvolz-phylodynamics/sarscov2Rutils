@@ -352,7 +352,7 @@ SEIJR_plot_daily_inf <- function(trajdf
 	}
 	
 	if (!is.data.frame( logdf ))
-		X <- readRDS(logdf )
+		X <- readRDS(logdf ) else X <- logdf
 	
 	dfs <- split( trajdf, trajdf$Sample )
 	taxis <- dfs[[1]]$t 
