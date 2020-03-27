@@ -354,6 +354,12 @@ SEIJR_plot_daily_inf <- function(trajdf
 	if (!is.data.frame( logdf ))
 		X <- readRDS(logdf ) else X <- logdf
 	
+		if(is.null(X$seir.tau))
+		  X$seir.tau <- 74; 
+		
+		if(is.null(X$seir.p_h))
+		  X$seir.p_h <- .2
+		
 	dfs <- split( trajdf, trajdf$Sample )
 	taxis <- dfs[[1]]$t 
 	
@@ -417,7 +423,7 @@ SEIJR_plot_daily_inf <- function(trajdf
 		ggsave(pl, file = path_to_save)
 	
 	list(
-	 pl
+	 pl = pl,
 	  , taxis = taxis 
 	  , Il = Il
 	  , Ih = Ih
