@@ -80,6 +80,7 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 	X
 }
 
+
 #' Combine BEAST log AND trajectory files after removing burnin
 #'
 #" Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
@@ -430,7 +431,7 @@ SEIJR_plot_daily_inf <- function(trajdf
 		ggsave(pl, file = path_to_save)
 	
 	list(
-	 pl = pl,
+	 pl = pl
 	  , taxis = taxis 
 	  , Il = Il
 	  , Ih = Ih
