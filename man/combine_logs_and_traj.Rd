@@ -10,7 +10,8 @@ combine_logs_and_traj(
   burnProportion = 0.5,
   ntraj = 200,
   ofn = NULL,
-  ofntraj = NULL
+  ofntraj = NULL,
+  pth = -1
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ combine_logs_and_traj(
 \item{ofn}{If not NULL will save the combined log to this file name}
 
 \item{ofntraj}{If not NULL will save the combined traj to this file name}
+
+\item{pth}{Threshold p value for excluding logs based on sampled posterior values. If <0 will include all logs}
 
 \item{bunrProportion}{Will remove this proportion from the beginning of logs}
 }

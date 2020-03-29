@@ -9,6 +9,7 @@ SEIJR_plot_size(
   case_data = NULL,
   date_limits = c(as.Date("2020-02-01"), NA),
   path_to_save = "size.png",
+  log_y_axis = F,
   ...
 )
 }

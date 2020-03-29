@@ -10,6 +10,7 @@ SEIJR_plot_daily_inf(
   case_data = NULL,
   date_limits = c(as.Date("2020-02-01"), NA),
   path_to_save = "daily.png",
+  log_y_axis = F,
   ...
 )
 }

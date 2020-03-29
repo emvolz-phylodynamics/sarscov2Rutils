@@ -95,7 +95,7 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 #' @param pth Threshold p value for excluding logs based on sampled posterior values. If <0 will include all logs
 #' @return List with with combined logs and traj
 #' @export
-combine_logs_and_traj2 <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL, pth = -1){
+combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL, pth = -1){
 	if ( length( logfns ) != length( trajfns))
 		stop('Provide *paired* log and traj files. These have different length.')
 	cat( 'These are the paired log and traj files provided\n')
