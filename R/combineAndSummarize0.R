@@ -92,9 +92,10 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 #' @param ntraj This integer number of trajectories will be sampled from each trajectory file 
 #' @param ofn If not NULL will save the combined log to this file name 
 #' @param ofntraj If not NULL will save the combined traj to this file name 
+#' @param pth Threshold p value for excluding logs based on sampled posterior values. If <0 will include all logs
 #' @return List with with combined logs and traj
 #' @export
-combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL){
+combine_logs_and_traj2 <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL, pth = -1){
 	if ( length( logfns ) != length( trajfns))
 		stop('Provide *paired* log and traj files. These have different length.')
 	cat( 'These are the paired log and traj files provided\n')
@@ -109,7 +110,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 
 	if ( length( Xs ) > 1 ){
 		medlogpos <- sapply( Xs, function(X) median (X$posterior ))
-		Xs <- Xs[ order( medlogpos, decreasing=TRUE ) ]
+		#Xs <- Xs[ order( medlogpos, decreasing=TRUE ) ]
 		
 		xdf = data.frame(logpo = NULL, logfn = NULL ) 
 		k <- 0
@@ -123,7 +124,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 		ps <- sapply( 1:(length(Xs)-1), function(k) {
 			a$logfn[ k, 4 ]
 		})
-		keep <- c( 1, 1 + which ( ps > .05 ) )
+		keep <- c( 1, 1 + which ( ps > pth ) )
 		for ( k in keep )
 			Xs[[k]]$Sample <- paste(sep='.', Xs[[k]]$Sample, k )
 		Xs1 <- Xs[ keep ]
@@ -170,10 +171,8 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	print( logfns[keep] )
 	cat( "These traj files were retained:\n" )
 	print( trajfns[keep] )
-
 	list( log = X, traj = J  )
 }
-
 
 
 #' Compute R0, growth rate and doubling time for the SEIJR.0.0 model 
