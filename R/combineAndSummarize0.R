@@ -430,7 +430,7 @@ SEIJR_plot_daily_inf <- function(trajdf
 		ggsave(pl, file = path_to_save)
 	
 	list(
-	 pl = pl,
+	 pl = pl
 	  , taxis = taxis 
 	  , Il = Il
 	  , Ih = Ih
