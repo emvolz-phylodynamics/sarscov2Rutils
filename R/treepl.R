@@ -22,9 +22,12 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 		  # logcombiner in Windows seems to take different commands, so it's rewritten here.
 		  # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
 		  # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
-		  command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
+		  # this command does not use the burnin command
+		  
+		  # the line below runs without downsampling; this made 60000 trees in the combined tree, and I didn't have enough memory to annotate it
+		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
 		  # below is the same but downsampling even further, in this case to every 10000 trees
-		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn, '-resample', 10000 ) 
+		  command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn, '-resample', 10000 )
 		  
 	}
 	  
@@ -34,7 +37,6 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 	TRUE
 }
 #~ tree_combiner_helper( 5000000 )
-
 
 
 #' Plot the maximum clade credibility tree and showing HPD node heights for nodes with >50 per cent node support. Tips sampled from within the specified demes will be coloured red.
