@@ -165,10 +165,10 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 }
 
 #' Select a random sample from aligment stratified through time 
-#' AND including close distance matches to a subset of sequences from a particular location
+#' AND including close distance matches to a subset of sequences from a particular region
 #' All sequences from given location will be included 
 #'
-#' Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label
+#' Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label. Alternatively can do a simple random sample within a region
 #'
 #' @param region_regex Sample names matching this regular expression will be retained and closest matches also retained
 #" @param path_to_align A DNAbin alignment *or* a system path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
@@ -177,10 +177,11 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 #' @param nregion sample size within region; if null will include everything in region
 #' @param q_threshold Clock outlier threshold 
 #' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
+#' @param time_stratify_region If TRUE (default) will perform a time stratified sample within region, otherwise will do a simple random sample 
 #' 
 #' @return A DNAbin alignment. Will also save to path_to_save 
 #' @export 
-region_time_stratified_sample <- function(region_regex, n, path_to_align, nregion = NULL,  path_to_save = NULL ) {
+region_time_stratified_sample <- function(region_regex, n, path_to_align, nregion = NULL,  path_to_save = NULL, time_stratify_region=TRUE ) {
 	library( ape ) 
 	library( treedater )
 	library( lubridate )
@@ -196,8 +197,12 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, nregio
 	nr <- nrow(dr ) 
 	if (!is.null( nregion )){
 		if ( nregion < nr ){
-			#dr <- dr[ sample( rownames(dr), replace=FALSE, size = nregion), ]
-			dr <- time_stratified_sample(nregion, dr, path_to_save = NULL )$alignment
+			if ( time_stratify_region){
+				#dr <- dr[ sample( rownames(dr), replace=FALSE, size = nregion), ]
+				dr <- time_stratified_sample(nregion, dr, path_to_save = NULL )$alignment
+			} else{ # do a simple random sample in region 
+				dr <- dr[ sample( rownames(dr), size = nregion, replace=FALSE ) , ] 
+			}
 		}
 	}
 	

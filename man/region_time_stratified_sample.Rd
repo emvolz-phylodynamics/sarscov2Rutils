@@ -3,7 +3,7 @@
 \name{region_time_stratified_sample}
 \alias{region_time_stratified_sample}
 \title{Select a random sample from aligment stratified through time 
-AND including close distance matches to a subset of sequences from a particular location
+AND including close distance matches to a subset of sequences from a particular region
 All sequences from given location will be included}
 \usage{
 region_time_stratified_sample(
@@ -11,7 +11,8 @@ region_time_stratified_sample(
   n,
   path_to_align,
   nregion = NULL,
-  path_to_save = NULL
+  path_to_save = NULL,
+  time_stratify_region = TRUE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ region_time_stratified_sample(
 
 \item{path_to_save}{Where to store (as fasta) the filtered alignment}
 
+\item{time_stratify_region}{If TRUE (default) will perform a time stratified sample within region, otherwise will do a simple random sample}
+
 \item{q_threshold}{Clock outlier threshold}
 
 \item{minEdge}{minimum branch length (substitutions per site) to stabilize clock inference}
@@ -31,5 +34,5 @@ region_time_stratified_sample(
 A DNAbin alignment. Will also save to path_to_save
 }
 \description{
-Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label
+Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label. Alternatively can do a simple random sample within a region
 }
