@@ -22,7 +22,7 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 		  # logcombiner in Windows seems to take different commands, so it's rewritten here.
 		  # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
 		  # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
-		  # this command does not use the burnin command
+		  # this command does not use the burnin arg
 		  
 		  # the line below runs without downsampling; this made 60000 trees in the combined tree, and I didn't have enough memory to annotate it
 		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
