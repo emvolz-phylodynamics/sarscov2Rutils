@@ -194,6 +194,12 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, nregio
 	dr = d[ grepl(pattern= region_regex, x = rownames(d) ) , ]
 	dnr = d[ setdiff( rownames(d), rownames(dr)), ]
 	
+	stsdr <- sapply( strsplit( rownames(dr), '\\|' ) , function(x){
+		decimal_date( ymd( tail(x,1)))
+	})
+	names( stsdr ) <- rownames( dr )
+	mrsid = names( stsdr )[ which.max( stsdr ) ] # most recent in region 
+	
 	nr <- nrow(dr ) 
 	if (!is.null( nregion )){
 		if ( nregion < nr ){
@@ -201,7 +207,9 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, nregio
 				#dr <- dr[ sample( rownames(dr), replace=FALSE, size = nregion), ]
 				dr <- time_stratified_sample(nregion, dr, path_to_save = NULL )$alignment
 			} else{ # do a simple random sample in region 
-				dr <- dr[ sample( rownames(dr), size = nregion, replace=FALSE ) , ] 
+				include = sample( setdiff( rownames(dr), mrsid ), size = nregion-1, replace=FALSE )
+				include <- c( include, mrsid )
+				dr <- dr[ include , ] 
 			}
 		}
 	}
