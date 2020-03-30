@@ -15,7 +15,20 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 	cat( 'NOTE: these tree logs are being combined. Double check that these are the files you want to combine\n' )
 	print( fns )
 	
-	command = paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn )
+	command = paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn )	
+
+		if(Sys.info()["sysname"] == "Windows") {
+	  
+		  # logcombiner in Windows seems to take different commands, so it's rewritten here.
+		  # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
+		  # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
+		  command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
+		  # below is the same but downsampling even further, in this case to every 10000 trees
+		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn, '-resample', 10000 ) 
+		  
+	}
+	  
+	
 	print ( command ) 
 	system ( command ) 
 	TRUE
