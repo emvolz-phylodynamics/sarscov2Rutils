@@ -15,14 +15,41 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 	cat( 'NOTE: these tree logs are being combined. Double check that these are the files you want to combine\n' )
 	print( fns )
 	
-	command = paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn )
+	command = paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn )	
+
+		if(Sys.info()["sysname"] == "Windows") {
+	  
+		  # logcombiner in Windows seems to take different commands, so it's rewritten here.
+		  # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
+		  # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
+		  # this command does not use the burnin arg
+		  
+		  # the line below runs without downsampling; this made 60000 trees in the combined tree, and I didn't have enough memory to annotate it
+		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
+		  # below is the same but downsampling even further, in this case to every 10000 trees
+		  command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn, '-resample', 10000 )
+		  
+	}
+	  
+	
 	print ( command ) 
 	system ( command ) 
 	TRUE
 }
 #~ tree_combiner_helper( 5000000 )
 
-
+#' Tree annotator in Windows
+#' 
+#' @param burnin Integer number of MCMC iters to treat as burnin 
+#' @param fns List of tree log files. If not provided, will recursively search the directory for logs 
+#' @export 
+tree_annotator_windows <- function( inputfile = "combined.trees", outputfile = "mcc.nex" ) {
+  command = paste("C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/treeannotator.bat -limit 0.5 -burnin 0", inputfile, outputfile)
+  print ( command ) 
+  system ( command ) 
+  TRUE
+}
+#~ tree_annotator_windows()
 
 #' Plot the maximum clade credibility tree and showing HPD node heights for nodes with >50 per cent node support. Tips sampled from within the specified demes will be coloured red.
 #'
