@@ -38,6 +38,18 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 }
 #~ tree_combiner_helper( 5000000 )
 
+#' Tree annotator in Windows
+#' 
+#' @param burnin Integer number of MCMC iters to treat as burnin 
+#' @param fns List of tree log files. If not provided, will recursively search the directory for logs 
+#' @export 
+tree_annotator_windows <- function( inputfile = "combined.trees", outputfile = "mcc.nex" ) {
+  command = paste("C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/treeannotator.bat -limit 0.5 -burnin 0", inputfile, outputfile)
+  print ( command ) 
+  system ( command ) 
+  TRUE
+}
+#~ tree_annotator_windows()
 
 #' Plot the maximum clade credibility tree and showing HPD node heights for nodes with >50 per cent node support. Tips sampled from within the specified demes will be coloured red.
 #'
