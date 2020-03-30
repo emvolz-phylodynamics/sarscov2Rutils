@@ -56,6 +56,7 @@ format_xml0 <- function( xmlfn , fastafn, treefn, start = 2020.085 ){
 	
 	
 	x = readLines( xmlfn ) 
+	xmlofn = gsub( xmlfn, pattern='skeleton', replacement='' )
 	
 	for ( k in 1:ntres ){
 		xk0 = gsub( x , pattern = 'START_TREE', replacement = write.tree( tres[[k]] )  )
@@ -63,10 +64,10 @@ format_xml0 <- function( xmlfn , fastafn, treefn, start = 2020.085 ){
 		xk2  = gsub( xk1, pattern='SEIJR_START', replacement= as.character(start) )
 		xk3 = gsub( xk2, pattern='SEQUENCES', replacement = seqdata )
 		
-		if ( !grepl( pattern = '\\.xml$', xmlfn )  )
-			writeLines( xk3, con =  paste0( xmlfn, '.', k )  )
+		if ( !grepl( pattern = '\\.xml$', xmlofn )  )
+			writeLines( xk3, con =  paste0( xmlofn, '.', k, '.xml' )  )
 		else 
-			writeLines( xk3, con =  gsub( pattern = '\\.xml$', replacement = paste0('\\.',k,'\\.xml'), xmlfn ) )
+			writeLines( xk3, con =  gsub( pattern = '\\.xml$', replacement = paste0('\\.',k,'\\.xml'), xmlofn ) )
 	}
 	invisible( xk3 )
 }
