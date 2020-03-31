@@ -115,6 +115,142 @@ filter_quality0 <- function( path_to_align, path_to_save = NULL , q_threshold=.0
 
 
 
+
+
+
+#' Remove samples from non-human hosts and sequences with incomplete date information and sequences with more than 10 per cent missing 
+#'
+#" @param path_to_align A DNAbin alignment OR a path to a fasta on disk 
+#' @param path_to_save Path to save fasta 
+#' @return DNAbin alignment
+#' @export 
+filter_hostAndDates <- function( path_to_align, path_to_save = NULL )
+{
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+
+	if ( inherits( path_to_align, 'DNAbin' ) )
+		d = path_to_align
+	else
+		d = read.dna( path_to_align, format = 'fasta')
+	
+	n0 <- nrow(d)
+	
+	# remove bat and pangolin and canine if present 
+	i = grepl( pattern = 'bat' , rownames(d)) | grepl( pattern = 'pangolin' , rownames(d)) | grepl( pattern = 'canine' , rownames(d))
+	d = d[!i, ]
+	
+	# remove any with incomplete dates if present
+	dts = lapply( strsplit( rownames(d), '\\|' ) , function(x){
+		suppressWarnings( ymd( tail(x,1)  ) )
+	})
+	keep <- sapply( dts, function(x) !is.na(x) )
+	d <- d[ keep , ]
+
+	# remove seq with more than 10% missing 
+	ngaps = sapply( 1:nrow(d) , function(i) sum( as.character(d[i,])=='-' ) )
+	keep <- ngaps < (.1*ncol(d))
+	d = d[keep, ]
+	
+	rownames(d) <- gsub( rownames(d), pattern=' ', replacement='_' )
+	
+	f0fasta = path_to_save 
+	if ( is.null( f0fasta ))
+		f0fasta = tempfile() 
+	
+	write.dna(d, file=f0fasta, format='fasta')
+	d
+}
+
+#' Selects a background reference set of sequences with good quality  
+#'
+#" Given an aligment with dates in tip labels, will remove 
+#' - sequences with poor relationship with a molecular clock
+#' - optionally deduplicate identical sequences 
+#'
+#" @param path_to_align A path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
+#' @param fn_tree Optional path to a maximum likelihood tree. If not provided, will estimate using fasttree. 
+#' @param path_to_save Where to store (as RDS) the filtered alignment etc
+#' @param q_threshold Clock outlier threshold 
+#' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
+#' @param deduplicate_identical if TRUE, will only include one sequence (most recent) from among sets of identical sequences
+#'
+#' @return Writes a RDS file containing filtered aligment, time tree, fasttree, and sample times. Return value is a list with the same 
+#' @export 
+filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, deduplicate_identical=TRUE, ncpu = 6,  ... )
+{
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+	
+	d = read.dna( path_to_align, format = 'fasta')
+	n0 <- nrow( d)
+	
+	# run fasttree 
+	if ( is.null( fn_tree )){
+		fn_tree = tempfile()
+		system( paste('fasttreeMP -nt', path_to_align, ' > ', fn_tree ) )
+		cat ( paste( 'Fasttree saved to ', fn_tree, '\n'))
+		tr0 = read.tree( fn_tree)
+		D <- as.matrix( cophenetic.phylo( tr0 ) ) 
+	}
+	
+	# remove outliers according to a strict molecular clock 
+	sts <- sapply( strsplit( rownames(d), '\\|' ) , function(x){
+		decimal_date( ymd( tail(x,1)))
+	})
+	names(sts) <- rownames(d)
+	# deduplicate identical sequences if indicated 
+	if (deduplicate_identical){
+		drop <- c() 
+		keep <- rownames(D)
+		ct = cutree( hclust( as.dist(D) ) , h = 1e-6  )
+		for ( k in unique( ct )){
+			s = names( ct )[ ct == k ]
+			if ( length( s ) > 1 ){
+				u = s[ which.max(sts[s])[1]  ]
+				drop <- c( drop , setdiff( s, u ) )
+			}
+		}
+		if ( length( drop  ) > 1 ){
+			keep <- setdiff( rownames(D), drop )
+			D <- D[keep, keep]
+			sts <- sts[ rownames(D)]
+		}
+		cat( paste( 'Removed', length( drop ), 'identical sequences\n' ) )
+	}
+	tr <- keep.tip( tr0, keep )#nj( D )
+	tr$edge.length <- pmax( tr$edge.length , minEdge)
+	# treedater designed to be fast rather than accurate for outlier detection: 
+	td <- suppressWarnings( dater( unroot( tr ), sts, s = 29e3, omega0=.001, numStartConditions=1, maxit=1,meanRateLimits=c(.00099,.00101) , ncpu = ncpu )  )
+	ot0 = outlierTips(td) 
+	outs0 = as.character( ot0$taxon )[ ot0$q < q_threshold ]
+	tr1 <- unroot( drop.tip( tr, outs0 ) )
+	#td1 <- suppressWarnings( dater( unroot( tr1 ), sts, s = 29e3, omega0 = .001,numStartConditions=1, maxit=1,meanRateLimits=c(.00099,.00101),  ...) )
+	
+	d1 = d[ tr1$tip.label, ]
+	
+	n1 <- Ntip( tr1 )
+	cat( paste('Removed', n0-n1, 'sequences.', n1, 'remaining. Aligment saved to', path_to_save, '\n') )
+	
+	rv = list( alignment = d1, time_tree = td , fasttree = tr0 , sts = sts )
+	if ( !is.null( path_to_save ))
+		saveRDS( rv, file = path_to_save )
+		#write.dna( d1, file = path_to_save, format = 'fasta' )
+	
+	rv
+}
+
+
+
+
+
+
+
+
+
+
 #' Select a random sample from aligment stratified through time 
 #'
 #' Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label

@@ -91,7 +91,33 @@ mcc_tree_plot <- function( nexfn, mostRecentSampleDate, regionDemes = c( 'Il', '
 # mcc_tree_plot( 'mcc.nex', mostRecentSampleDate = '2020-03-17' )
 
 
+#' Plot a rooted tree (may be a time tree) with tips highlighting a matching regex
+#'
+#' @param td A rooted tree, may be a treedater output 
+#' @param region A regular expression matching the tips that you want to highlight 
+#' @param maxdate If a time tree, you can optionally give the date of the most recent sample
+#' @return A ggtree plot
+#' @export 
+quick_region_treeplot = function( td, region , maxdate = NULL)
+{ #date_decimal( max(tr$sts))
+	require(ggtree )
+	require(ggplot2)
+	tr = td 
+	class( tr ) = 'phylo'
+	btr = ggtree(tr, mrsd= maxdate, ladderize=TRUE)  + theme_tree2() 
+	tipdeme <-  grepl( tr$tip.label, pat = region ) 
+	tipdata <- data.frame( 
+	  taxa =tr$tip.label
+	  , region =  tipdeme 
+	)
+	tipdata$size <- .75
+	tipdata$size[ !tipdata$region ] <- 0
+	tipdata$region[ !tipdata$region ] <- NA
+	btr <- btr %<+% tipdata 
+	btr = btr + geom_tippoint( aes(color = region, size = size), na.rm=TRUE, show.legend=FALSE, size =1.25) + theme_tree2( legend.position = "none" )
 
+	btr + ggplot2::ggtitle( region )
+}
 
 #~ --------------------------
 #~ ml and treedater 
