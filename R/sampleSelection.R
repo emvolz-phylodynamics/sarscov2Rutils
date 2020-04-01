@@ -205,6 +205,7 @@ filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q
 		decimal_date( ymd( tail(x,1)))
 	})
 	names(sts) <- rownames(d)
+	keep <- rownames(D)
 	# deduplicate identical sequences if indicated 
 	if (deduplicate_identical){
 		drop <- c() 
