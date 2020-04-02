@@ -6,35 +6,44 @@ library ( treeio )
 
 #' Wrapper for logcombiner 
 #' 
-#' @param burnin Integer number of MCMC iters to treat as burnin 
+#' @param burnin Unix: Integer number of MCMC iters to treat as burnin; In windows this is the percentage burnin as a number
 #' @param fns List of tree log files. If not provided, will recursively search the directory for logs 
+#' @param resample set this to downsample logs further when combining
 #' @export 
-tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
-	if ( is.null( fns ))
-		fns = list.files( pattern='trees$', recursive=TRUE)
-	cat( 'NOTE: these tree logs are being combined. Double check that these are the files you want to combine\n' )
-	print( fns )
-	
-	command = paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn )	
+tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees', resample = NULL){
+  if ( is.null( fns ))
+    fns = list.files( pattern='trees$', recursive=TRUE)
+  cat( 'NOTE: these tree logs are being combined. Double check that these are the files you want to combine\n' )
+  print( fns )
+  
+  command = ifelse(is.null(resample),
+                   paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn ),
+                   paste( 'logcombiner', '-trees', '-burnin', format(burnin, scientific=FALSE), paste(collapse=' ', fns ) , ofn, '-resample', resample))
+  
+  if(Sys.info()["sysname"] == "Windows") {
+    if(system("logcombiner -help >NUL 2>NUL")==0){
+      command = ifelse(is.null(resample),
+                       paste( 'logcombiner', '-log', paste(collapse=' ', fns ), '-b', format(burnin, scientific=FALSE) ,'-o', ofn),
+                       paste( 'logcombiner', '-log', paste(collapse=' ', fns ), '-b', format(burnin, scientific=FALSE) ,'-o', ofn, '-resample', resample))
+    } else {
+    message("
+            logcombiner is not in your path.
+            Either add the BEAST/bat folder to path
+            Or run the command with the full filepath to logcombiner.bat
+            command = ", paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
+            )
+      command = NULL
+    }
+      # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
+    # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
 
-		if(Sys.info()["sysname"] == "Windows") {
-	  
-		  # logcombiner in Windows seems to take different commands, so it's rewritten here.
-		  # you have to paste in your filepath to logcombiner.bat -- someone can generalise this if needs be
-		  # note that burnin is required as a percentage (eg 50) instead of an absolute number of trees
-		  # this command does not use the burnin arg
-		  
-		  # the line below runs without downsampling; this made 60000 trees in the combined tree, and I didn't have enough memory to annotate it
-		  # command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn ) 
-		  # below is the same but downsampling even further, in this case to every 10000 trees
-		  command = paste( 'C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/logcombiner.bat', '-log', paste(collapse=' ', fns ), '-b', format(50, scientific=FALSE) ,'-o', ofn, '-resample', 10000 )
-		  
-	}
-	  
-	
-	print ( command ) 
-	system ( command ) 
-	TRUE
+    
+  }
+  
+  
+  print ( command ) 
+  system ( command ) 
+  TRUE
 }
 #~ tree_combiner_helper( 5000000 )
 
@@ -42,9 +51,23 @@ tree_combiner_helper <- function( burnin , fns = NULL, ofn = 'combined.trees'){
 #' 
 #' @param burnin Integer number of MCMC iters to treat as burnin 
 #' @param fns List of tree log files. If not provided, will recursively search the directory for logs 
+#' @param lowMem Set to TRUE to run treeanotator in low memory mode.
 #' @export 
-tree_annotator_windows <- function( inputfile = "combined.trees", outputfile = "mcc.nex" ) {
-  command = paste("C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/treeannotator.bat -limit 0.5 -burnin 0", inputfile, outputfile)
+tree_annotator_windows <- function( inputfile = "combined.trees", outputfile = "mcc.nex", lowMem=FALSE ) {
+  if(system("treeannotator -help >NUL 2>NUL")==0){
+    command = ifelse(lowMem,
+    paste( 'treeannotator', '-lowMem -limit 0.5 -burnin 0', inputfile, outputfile),
+    paste( 'treeannotator', '-limit 0.5 -burnin 0', inputfile, outputfile))
+    
+  } else {
+    message("
+            treeannotator is not in your path.
+            Either add the BEAST/bat folder to path
+            Or run the command with the full filepath to treeannotator.bat
+            command = paste('C:/Users/lilyl/Downloads/BEAST_with_JRE.v2.6.2.Windows/BEAST/bat/treeannotator.bat -limit 0.5 -burnin 0', inputfile, outputfile)
+            ")
+    command = NULL
+  }
   print ( command ) 
   system ( command ) 
   TRUE
