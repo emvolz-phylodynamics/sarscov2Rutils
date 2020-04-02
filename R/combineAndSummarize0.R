@@ -175,6 +175,86 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 }
 
 
+
+#' Automatic generation of metadata.yml
+#' You can add more information if you like
+#' 
+#' @export 
+write_phylo_metadata_yaml <- function(
+  
+  # GENERAL INFO
+  
+  author = "Lily Geidelberg", # Who did this analysis? 
+  model_version = "seijr0.0.0", # Compartmental model version
+  
+  # What dates do you want the plots to run from and to?
+  # NOTE that at the moment plots will start from just after the SEIJR dynamics kick in; the script ignores start_date for now
+  start_date = "2020-01-24",
+  end_date = "2020-02-24",
+  
+  
+  # SEQUENCE INFO
+  
+  sequence_downsampling = "none", # "deduplicated" "random"
+  
+  first_sample = "2020-01-24", # When was the first sample?
+  last_sample = "2020-02-10", # When was the last sample?
+  internal_seq = 20, # How many regional sequences did you use?
+  exog_seq = 33, # How many exogenous sequences did you use?
+  
+  
+  
+  # TREE ESTIMATION METHODS
+  tree_estimation_method = "free_tree", # "free_node" "fixed_tree"
+  
+  n_startingtrees = 20, # Number of starting trees
+  
+  
+  # CLOCK MODEL
+  init_clock_rate = 0.0015,
+  
+  # PRIORS
+  tree_prior = "PhyDyn_SEIR",
+  min_P = 0.01,
+  Penalty_Agt_Y = 0,
+  
+  
+  # Pop params
+  T0 = 2019.7,
+  exog_init_pop = 0.01,
+  S = 500, # if estimated, put "estimated"
+  b = 15,
+  gamma0 = 73,
+  gamma1 = 121.667,
+  importRate = 5,
+  tau = "estimated",
+  p_h = "estimated",
+  
+  Ne = 0.1,
+  clock_rate_prior_lower = 0.0005,
+  clock_rate_prior_upper = 0.005,
+  
+  
+  # TREE OPERATORS. T = lines were left as is following generation of XML. F = lines removed.
+  PhydynSEIRTreeScaler = T,
+  PhydynSEIRTreeRootScaler = T,
+  PhydynSEIRUniformOperator = T,
+  CoalescentConstantWilsonBalding = T,
+  CoalescentConstantSubtreeSlide = T,
+  CoalescentConstantNarrow = T,
+  CoalescentConstantWide = T,
+  
+  ...
+  
+) {
+  yaml::write_yaml(c(as.list(environment()), list(...)), "metadata.yml")
+  return(metadata = c(as.list(environment()), list(...)))
+}
+#~ write_phylo_metadata_yaml()
+
+
+
+
 #' Compute R0, growth rate and doubling time for the SEIJR.0.0 model 
 #'
 #' Also prints to the screen a markdown table with the results. This can be copied into reports. 
