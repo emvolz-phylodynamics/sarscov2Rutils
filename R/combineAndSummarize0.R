@@ -185,6 +185,7 @@ write_phylo_metadata_yaml <- function(
   # GENERAL INFO
   
   author = "Lily Geidelberg", # Who did this analysis? 
+  location = "weifang",
   model_version = "seijr0.0.0", # Compartmental model version
   
   # What dates do you want the plots to run from and to?
