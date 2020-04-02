@@ -170,7 +170,7 @@ filter_hostAndDates <- function( path_to_align, path_to_save = NULL )
 #' - optionally deduplicate identical sequences 
 #'
 #" @param path_to_align A path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
-#' @param fn_tree Optional path to a maximum likelihood tree. If not provided, will estimate using fasttree. 
+#' @param fn_tree Optional path to a maximum likelihood tree OR a ape::phylo. If not provided, will estimate using fasttree. 
 #' @param path_to_save Where to store (as RDS) the filtered alignment etc
 #' @param q_threshold Clock outlier threshold 
 #' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
@@ -192,7 +192,11 @@ filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q
 		fn_tree = tempfile()
 		system( paste('fasttreeMP -nt', path_to_align, ' > ', fn_tree ) )
 		cat ( paste( 'Fasttree saved to ', fn_tree, '\n'))
-		tr0 = read.tree( fn_tree)
+	} else{
+		if ( is.character( fn_tree ))
+			tr0 = read.tree( fn_tree)
+		else if( inherits(fn_tree, 'phylo' ))
+			tr0 = fn_tree
 		D <- as.matrix( cophenetic.phylo( tr0 ) ) 
 	}
 	
@@ -201,6 +205,7 @@ filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q
 		decimal_date( ymd( tail(x,1)))
 	})
 	names(sts) <- rownames(d)
+	keep <- rownames(D)
 	# deduplicate identical sequences if indicated 
 	if (deduplicate_identical){
 		drop <- c() 
