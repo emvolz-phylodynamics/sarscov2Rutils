@@ -171,7 +171,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	print( logfns[keep] )
 	cat( "These traj files were retained:\n" )
 	print( trajfns[keep] )
-	list( log = X, traj = J , medlogpos = medlogpos )
+	list( log = X, traj = J , medlogpos = medlogpos, keep = keep )
 }
 
 
