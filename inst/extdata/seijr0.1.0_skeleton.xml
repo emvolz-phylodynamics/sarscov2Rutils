@@ -260,7 +260,7 @@ name="alignment">
         <log idref="PhydynSEIR.t:algn"/>
     </logger>
 
-    <logger id="treelog.t:algn" spec="Logger" fileName="$(tree).trees" logEvery="1000" mode="tree">
+    <logger id="treelog.t:algn" spec="Logger" fileName="algn.trees" logEvery="1000" mode="tree">
         <log id="TreeWithMetaDataLogger.t:algn" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:algn"/>
     </logger>
 
