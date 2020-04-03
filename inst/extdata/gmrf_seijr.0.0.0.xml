@@ -41,7 +41,7 @@ name="alignment">
                     <alignment idref="algn"/>
                 </taxa>
             </trait>
-            <taxonset idref="TaxonSet.england2"/>
+            <taxonset idref="TaxonSet.algn"/>
         </tree>
         <parameter id="clockRate.c:algn" spec="parameter.RealParameter" lower="5.0E-4" name="stateNode" upper="0.005">0.0015</parameter>
         <parameter id="kappa.s:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
@@ -290,7 +290,7 @@ name="alignment">
         <log idref="seir.dlogbeta.t"/>
     </logger>
 
-    <logger id="treelog.t:algn" spec="Logger" fileName="$(tree).trees" logEvery="1000" mode="tree">
+    <logger id="treelog.t:algn" spec="Logger" fileName="algn.trees" logEvery="1000" mode="tree">
         <log id="TreeWithMetaDataLogger.t:algn" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:algn"/>
     </logger>
 
