@@ -1,5 +1,7 @@
 library( ape ) 
 library( treedater ) 
+library( phangorn )
+library( ggtree )
 
 .mltr <-  function( fn ){
 	file.copy( fn, getwd() )
