@@ -175,10 +175,11 @@ filter_hostAndDates <- function( path_to_align, path_to_save = NULL )
 #' @param q_threshold Clock outlier threshold 
 #' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
 #' @param deduplicate_identical if TRUE, will only include one sequence (most recent) from among sets of identical sequences
+#' @param collapse_D Any distances less than this value will be treated as zero 
 #'
 #' @return Writes a RDS file containing filtered aligment, time tree, fasttree, and sample times. Return value is a list with the same 
 #' @export 
-filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, deduplicate_identical=TRUE, ncpu = 6,  ... )
+filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q_threshold=.05, minEdge=1/29e3/10, deduplicate_identical=TRUE, ncpu = 6, collapse_D = 1/29e3/2)
 {
 	library( ape ) 
 	library( treedater )
@@ -198,6 +199,7 @@ filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q
 		else if( inherits(fn_tree, 'phylo' ))
 			tr0 = fn_tree
 		D <- as.matrix( cophenetic.phylo( tr0 ) ) 
+		D[ D < collapse_D] <- 0
 	}
 	
 	# remove outliers according to a strict molecular clock 
@@ -313,6 +315,7 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 #'
 #' @param region_regex Sample names matching this regular expression will be retained and closest matches also retained
 #" @param path_to_align A DNAbin alignment *or* a system path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
+#' @param D An optional distance matrix between sequences. Can be based on cophenetic distance from ML tree. If not provided will compute using a HKY model (slow!)
 #' @param path_to_save Where to store (as fasta) the filtered alignment
 #' @param n sample size from outside region 
 #' @param nregion sample size within region; if null will include everything in region
@@ -322,7 +325,7 @@ time_stratified_sample <- function(n, path_to_align, path_to_save = NULL ) {
 #' 
 #' @return A DNAbin alignment. Will also save to path_to_save 
 #' @export 
-region_time_stratified_sample <- function(region_regex, n, path_to_align, nregion = NULL,  path_to_save = NULL, time_stratify_region=TRUE ) {
+region_time_stratified_sample <- function(region_regex, n, path_to_align, D = NULL, nregion = NULL,  path_to_save = NULL, time_stratify_region=TRUE ) {
 	library( ape ) 
 	library( treedater )
 	library( lubridate )
@@ -355,7 +358,8 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, nregio
 		}
 	}
 	
-	D <- dist.dna( d, 'F84' , pairwise.deletion=TRUE )
+	if (is.null(D))
+		D <- dist.dna( d, 'F84' , pairwise.deletion=TRUE )
 	Drnr <- as.matrix( D )[ rownames(dr), rownames(dnr ) ]
 	keep <- c()
 	for ( i in 1:nrow(dr )){

@@ -4,9 +4,15 @@
 \alias{tree_annotator_windows}
 \title{Tree annotator in Windows}
 \usage{
-tree_annotator_windows(inputfile = "combined.trees", outputfile = "mcc.nex")
+tree_annotator_windows(
+  inputfile = "combined.trees",
+  outputfile = "mcc.nex",
+  lowMem = FALSE
+)
 }
 \arguments{
+\item{lowMem}{Set to TRUE to run treeanotator in low memory mode.}
+
 \item{burnin}{Integer number of MCMC iters to treat as burnin}
 
 \item{fns}{List of tree log files. If not provided, will recursively search the directory for logs}

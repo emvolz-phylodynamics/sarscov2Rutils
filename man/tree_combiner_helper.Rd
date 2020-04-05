@@ -4,12 +4,19 @@
 \alias{tree_combiner_helper}
 \title{Wrapper for logcombiner}
 \usage{
-tree_combiner_helper(burnin, fns = NULL, ofn = "combined.trees")
+tree_combiner_helper(
+  burnin,
+  fns = NULL,
+  ofn = "combined.trees",
+  resample = NULL
+)
 }
 \arguments{
-\item{burnin}{Integer number of MCMC iters to treat as burnin}
+\item{burnin}{Unix: Integer number of MCMC iters to treat as burnin; In windows this is the percentage burnin as a number}
 
 \item{fns}{List of tree log files. If not provided, will recursively search the directory for logs}
+
+\item{resample}{set this to downsample logs further when combining}
 }
 \description{
 Wrapper for logcombiner

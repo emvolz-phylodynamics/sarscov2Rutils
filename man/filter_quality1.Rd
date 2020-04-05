@@ -12,7 +12,7 @@ filter_quality1(
   minEdge = 1/29000/10,
   deduplicate_identical = TRUE,
   ncpu = 6,
-  ...
+  collapse_D = 1/29000/2
 )
 }
 \arguments{
@@ -25,6 +25,8 @@ filter_quality1(
 \item{minEdge}{minimum branch length (substitutions per site) to stabilize clock inference}
 
 \item{deduplicate_identical}{if TRUE, will only include one sequence (most recent) from among sets of identical sequences}
+
+\item{collapse_D}{Any distances less than this value will be treated as zero}
 }
 \value{
 Writes a RDS file containing filtered aligment, time tree, fasttree, and sample times. Return value is a list with the same

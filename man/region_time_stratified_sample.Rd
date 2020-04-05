@@ -10,6 +10,7 @@ region_time_stratified_sample(
   region_regex,
   n,
   path_to_align,
+  D = NULL,
   nregion = NULL,
   path_to_save = NULL,
   time_stratify_region = TRUE
@@ -19,6 +20,8 @@ region_time_stratified_sample(
 \item{region_regex}{Sample names matching this regular expression will be retained and closest matches also retained}
 
 \item{n}{sample size from outside region}
+
+\item{D}{An optional distance matrix between sequences. Can be based on cophenetic distance from ML tree. If not provided will compute using a HKY model (slow!)}
 
 \item{nregion}{sample size within region; if null will include everything in region}
 
