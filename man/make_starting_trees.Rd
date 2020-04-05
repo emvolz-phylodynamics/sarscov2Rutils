@@ -2,21 +2,32 @@
 % Please edit documentation in R/starttree1.R
 \name{make_starting_trees}
 \alias{make_starting_trees}
-\title{Make starting trees}
+\title{Make starting trees and ML tree plot}
 \usage{
-make_starting_trees(fastafn, treeoutfn = "startTrees.nwk", ntres = 1, ncpu = 4)
+make_starting_trees(
+  fastafn,
+  treeoutfn = "startTrees.nwk",
+  plotout = "MLtree.png",
+  regionDemes = c("Il"),
+  ntres = 1,
+  ncpu = 4
+)
 }
 \arguments{
 \item{fastafn}{File name of sequence data (needed for ML tree estimation)}
 
 \item{treeoutfn}{File name of trees to be written}
 
+\item{plotout}{File name of ML tree plot. set to Null to not plot}
+
+\item{regionDemes}{demes to colour in the output tree plot}
+
 \item{ntres}{integer how many start trees to produce? a distinct xml is made for each}
 
 \item{ncpu}{Number of CPUs to use}
 }
 \value{
-Some treedater trees. New start trees are written to disk
+Some treedater trees. New start trees are written to disk. ML tree plot written to disk
 }
 \description{
 This will generate multiple starting trees by ML & treedater. 

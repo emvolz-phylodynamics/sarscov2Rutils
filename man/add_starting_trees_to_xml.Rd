@@ -2,14 +2,25 @@
 % Please edit documentation in R/starttree1.R
 \name{add_starting_trees_to_xml}
 \alias{add_starting_trees_to_xml}
-\title{Make starting trees and insert into beast xml}
+\title{Make starting trees, insert into beast xml and create ML tree plot}
 \usage{
-add_starting_trees_to_xml(xmlfn, fastafn, ntres = 1, ncpu = 4)
+add_starting_trees_to_xml(
+  xmlfn,
+  fastafn,
+  plotout = "MLtree.png",
+  regionDemes = c("Il"),
+  ntres = 1,
+  ncpu = 4
+)
 }
 \arguments{
 \item{xmlfn}{File name of beast xml}
 
 \item{fastafn}{File name of sequence data (needed for ML tree estimation)}
+
+\item{plotout}{Output file name for ML tree plot. Set NULL to not plot}
+
+\item{regionDemes}{regions to colour in the output ML tree}
 
 \item{ntres}{integer how many start trees to produce? a distinct xml is made for each}
 

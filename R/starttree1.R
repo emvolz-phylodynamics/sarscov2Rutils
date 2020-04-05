@@ -56,7 +56,7 @@ make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
 	names(sts) <- tr$tip.label 
 
 	tr1 <- tr 
-	tr1$edge.length <- pmax( 1/29e3/10 , tr1$edge.length )
+	tr1$edge.length <- pmax( 1/29e3/5 , tr1$edge.length )
 	td = dater( unroot(tr1), sts, s= 29e3, omega0 = .0012, numStartConditions=0, meanRateLimits = c( .0009, .0015) , ncpu = ncpu )
 
 	write.tree( td, file = treeofn ) 
@@ -66,50 +66,6 @@ make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
 #~ td = make_starting_tree( 'nl2.fasta' )
 
 
-#' Make starting trees 
-#' 
-#' This will generate multiple starting trees by ML & treedater. 
-#' Each tree is produced by a different random resolution of polytomies in the ML tree
-#' Sequence names must have sample times included (see prep_tip_labels)
-#' 
-#' @param fastafn File name of sequence data (needed for ML tree estimation)
-#' @param treeoutfn File name of trees to be written 
-#' @param ntres integer how many start trees to produce? a distinct xml is made for each 
-#' @param ncpu Number of CPUs to use 
-#' @return Some treedater trees. New start trees are written to disk 
-#' @export
-make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , ntres = 1,  ncpu = 4 ){
-	if ( inherits( fastafn, 'phylo' )  )
-		tr <- fastafn 
-	else
-		tr = .mltr( fastafn  )
-	
-	sts <- sapply( strsplit( tr$tip.label, '\\|' ), function(x){
-		as.numeric( tail(x,2)[1] )
-	})
-	names(sts) <- tr$tip.label 
-	
-	tr <- di2multi( tr, tol = 1e-5 ) # make polytomies 
-	tres <- lapply( 1:ntres, function(i) { # resolve polytomies randomly 
-		tr = unroot( multi2di( tr )  )  
-		tr$edge.length <- pmax( 1e-6, tr$edge.length / 29e3 ) # note branch length is subst per genome ; we translate it to subst per site 
-		tr
-	})
-	tds <- lapply( tres, function(tr){
-		dater( unroot(tr), sts[tr$tip.label], s= 29e3, omega0 = .0012, numStartConditions=0, meanRateLimits = c( .0009, .0015) , ncpu = ncpu )
-	})
-	
-	outtrees = lapply( tds, function(x){
-			class(x) <- 'phylo'
-			x
-		})
-	class( outtrees ) <- 'multiPhylo' 
-	write.tree( outtrees 
-		, file = treeoutfn 
-	)
-	
-	invisible( tds )
-}
 
 #' Make starting trees and ML tree plot
 #' 
@@ -125,7 +81,7 @@ make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , ntres = 
 #' @param ncpu Number of CPUs to use 
 #' @return Some treedater trees. New start trees are written to disk. ML tree plot written to disk
 #' @export
-make_starting_trees1 <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
+make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
   if ( inherits( fastafn, 'phylo' )  )
     tr <- fastafn 
   else
@@ -139,7 +95,7 @@ make_starting_trees1 <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout
   tr <- di2multi( tr, tol = 1e-5 ) # make polytomies 
   tres <- lapply( 1:ntres, function(i) { # resolve polytomies randomly 
     tr = unroot( multi2di( tr )  )  
-    tr$edge.length <- pmax( 1e-6, tr$edge.length / 29e3 ) # note branch length is subst per genome ; we translate it to subst per site 
+    tr$edge.length <- pmax( 1/29e3/5, tr$edge.length  ) #ensures that edge is >0, makes treedater fit a little nicer 
     tr
   })
   tds <- lapply( tres, function(tr){
@@ -157,7 +113,6 @@ make_starting_trees1 <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout
     plt <- plt %<+% treedata +
       geom_tippoint(aes(color = region), na.rm=TRUE, show.legend=FALSE, size =1.25) + theme_tree2( legend.position = "none" )
     ggsave(plt, file = plotout , width = 4, height=7)
-    
   }
   
   outtrees = lapply( tds, function(x){
@@ -173,51 +128,6 @@ make_starting_trees1 <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout
 }
 
 
-#' Make starting trees and insert into beast xml 
-#' 
-#' This will generate multiple starting trees by ML & treedater. 
-#' Each tree is produced by a different random resolution of polytomies in the ML tree
-#' Sequence names must have sample times included (see prep_tip_labels)
-#' 
-#' @param xmlfn File name of beast xml
-#' @param fastafn File name of sequence data (needed for ML tree estimation)
-#' @param ntres integer how many start trees to produce? a distinct xml is made for each 
-#' @param ncpu Number of CPUs to use 
-#' @return Some treedater trees. New XMLs are written to disk 
-#' @export
-add_starting_trees_to_xml <- function( xmlfn ,  fastafn , ntres = 1,  ncpu = 4 ){
-	if ( inherits( fastafn, 'phylo' )  )
-		tr <- fastafn 
-	else
-		tr = .mltr( fastafn  )
-	
-	sts <- sapply( strsplit( tr$tip.label, '\\|' ), function(x){
-		as.numeric( tail(x,2)[1] )
-	})
-	names(sts) <- tr$tip.label 
-	
-	tr <- di2multi( tr, tol = 1e-5 ) # make polytomies 
-	tres <- lapply( 1:ntres, function(i) { # resolve polytomies randomly 
-		tr = unroot( multi2di( tr )  )  
-		tr$edge.length <- pmax( 1e-6, tr$edge.length / 29e3 ) # note branch length is subst per genome ; we translate it to subst per site 
-		tr
-	})
-	tds <- lapply( tres, function(tr){
-		dater( unroot(tr), sts[tr$tip.label], s= 29e3, omega0 = .0012, numStartConditions=0, meanRateLimits = c( .0009, .0015) , ncpu = ncpu )
-	})
-	
-	x = readLines( xmlfn ) 
-	for ( k in 1:ntres ){
-		xk = gsub( x , pattern = 'START_TREE', replacement = write.tree( tds[[k]] )  )
-		if ( !grepl( pattern = '\\.xml$', xmlfn )  )
-			writeLines( xk, con =  paste0( xmlfn, '.', k )  )
-		else 
-			writeLines( xk, con =  gsub( pattern = '\\.xml$', replacement = paste0('\\.',k,'\\.xml'), xmlfn ) )
-	}
-	tds
-}
-#~ xmlfn = 'nltest.xml' 
-#~ tds = add_starting_trees_to_xml( xmlfn, 'nl2test.fasta', ntres = 2 )
 
 #' Make starting trees, insert into beast xml and create ML tree plot
 #' 
@@ -233,7 +143,7 @@ add_starting_trees_to_xml <- function( xmlfn ,  fastafn , ntres = 1,  ncpu = 4 )
 #' @param ncpu Number of CPUs to use 
 #' @return Some treedater trees. New XMLs are written to disk 
 #' @export
-add_starting_trees_to_xml1 <- function( xmlfn ,  fastafn , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
+add_starting_trees_to_xml <- function( xmlfn ,  fastafn , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
   if ( inherits( fastafn, 'phylo' )  )
     tr <- fastafn 
   else
@@ -247,7 +157,7 @@ add_starting_trees_to_xml1 <- function( xmlfn ,  fastafn , plotout='MLtree.png',
   tr <- di2multi( tr, tol = 1e-5 ) # make polytomies 
   tres <- lapply( 1:ntres, function(i) { # resolve polytomies randomly 
     tr = unroot( multi2di( tr )  )  
-    tr$edge.length <- pmax( 1e-6, tr$edge.length / 29e3 ) # note branch length is subst per genome ; we translate it to subst per site 
+    tr$edge.length <- pmax( 1/29e3/5, tr$edge.length ) 
     tr
   })
   tds <- lapply( tres, function(tr){
