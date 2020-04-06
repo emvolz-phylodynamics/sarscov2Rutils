@@ -6,6 +6,6 @@ Date: 2020-04-05
 Author: Erik M Volz, Lily Geidelberg, Manon Ragonnet, David Jorgensen 
 Maintainer: Erik M Volz <erik.volz@gmail.com>
 Description: Functions to filter and prepare special interest alignments and summarize beast analyses 
-Requires: ape,treedater(>=0.5.0),lubridate,ggtree,ggplot2,knitr,coda
+Requires: ape,treedater(>=0.5.0),lubridate,ggtree,ggplot2,knitr,coda,phangorn
 License: LGPL
 RoxygenNote: 7.1.0
