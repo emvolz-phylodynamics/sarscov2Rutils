@@ -198,8 +198,8 @@ write_phylo_metadata_yaml <- function(
   
   sequence_downsampling = "none", # "deduplicated" "random"
   
-  first_sample = "2020-01-24", # When was the first sample?
-  last_sample = "2020-02-10", # When was the last sample?
+  first_sample = "2020-01-24", # When was the first INTERNAL sample?
+  last_sample = "2020-02-10", # When was the last INTERNAL sample?
   internal_seq = 20, # How many regional sequences did you use?
   exog_seq = 33, # How many exogenous sequences did you use?
   
