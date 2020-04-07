@@ -335,7 +335,7 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, D = NU
 	else
 		d = read.dna( path_to_align, format = 'fasta')
 	
-	dr = d[ grepl(pattern= region_regex, x = rownames(d) ) , ]
+	dr = d[ grepl(pattern= region_regex, x = rownames(d), perl = TRUE ) , ]
 	dnr = d[ setdiff( rownames(d), rownames(dr)), ]
 	
 	stsdr <- sapply( strsplit( rownames(dr), '\\|' ) , function(x){
@@ -410,9 +410,9 @@ prep_tip_labels_phydyn <- function( path_to_align, path_to_save = NULL
 	demegroups = lapply( 1:length(demes), function(k) {
 		x = regexprs[k]
 		if ( invert_regexpr[k] ) {
-			return( sids[ !grepl( pattern = x , sids ) ] )
+			return( sids[ !grepl( pattern = x , sids , perl = TRUE) ] )
 		}else{
-			return( sids[ grepl( pattern = x , sids ) ] )
+			return( sids[ grepl( pattern = x , sids , perl = TRUE) ] )
 		}
 	})
 	int <- do.call( intersect, demegroups )
