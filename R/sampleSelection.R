@@ -200,6 +200,18 @@ filter_quality1 <- function(path_to_align, fn_tree=NULL, path_to_save = NULL , q
 			tr0 = fn_tree
 		D <- as.matrix( cophenetic.phylo( tr0 ) ) 
 		D[ D < collapse_D] <- 0
+		
+		# in case tree doesnt match alignment: 
+		keep <- intersect( rownames(d) , rownames(D))
+		D <- D[keep,keep]
+		d <- d[keep, ]
+		dropped = setdiff( rownames(d), keep )
+		if ( length( dropped )  > 0 ){
+			cat( 'NOTE: not all sequences had matches in the provided ML tree or distance matrix. These were dropped from the alignment :\n' )
+			print( dropped )
+			cat(paste(  'The number of sequences dropped is ', length( dropped ), '\n' ) )
+		}
+		D <- D[ rownames( d ) , rownames(d) ]  
 	}
 	
 	# remove outliers according to a strict molecular clock 
