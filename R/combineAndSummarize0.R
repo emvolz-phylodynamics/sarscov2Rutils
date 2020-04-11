@@ -609,3 +609,96 @@ SEIJR_plot_Rt <- function(trajdf
 	)
 }
 
+#' Plot reporting rate through time from SEIJR trajectory sample and reported cases
+#' 
+#'
+#' @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
+#' @param case_data dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )
+#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
+#' @param path_to_save Will save a png here 
+#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
+#' @export 
+
+SEIJR_plot_reporting <- function(trajdf
+                                 , case_data
+                                 , date_limits = c( as.Date( '2020-02-01'), NA ) 
+                                 , path_to_save='reporting.png'
+                                 , ...
+) {
+  library( ggplot2 ) 
+  library( lubridate )
+  library( dplyr )
+  
+  if (!is.data.frame(trajdf)){
+    # assume this is path to a rds 
+    readRDS(trajdf) -> trajdf 
+  }
+  
+  dfs <- split( trajdf, trajdf$Sample )
+  taxis <- dfs[[1]]$t 
+  
+  if ( is.na( date_limits[2]) )
+    date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+  
+  qs <- c( .5, .025, .975 )
+  
+  # infectious
+  Il = do.call( cbind, lapply( dfs, '[[', 'Il' ))
+  Ih = do.call( cbind, lapply( dfs, '[[', 'Ih' ))
+  I = Il + Ih 
+  t(apply( I, MAR=1, FUN= function(x) quantile(x, qs ))) -> Ici 
+  
+  # cases 
+  cases <- do.call( cbind, lapply( dfs, '[[', 'infections' ))
+  t(apply( cases, MAR=1, FUN=function(x) quantile(x,qs))) -> casesci 
+  
+  #exog 
+  exog <- do.call( cbind, lapply( dfs, '[[', 'exog' ))
+  t(apply( exog, MAR=1, FUN=function(x) quantile(x, qs )	)) -> exogci 
+  
+  #E
+  E <- do.call( cbind, lapply( dfs, '[[', 'E' ))
+  t(apply( E, MAR=1, FUN=function(x) quantile(x, qs )	)) -> Eci 
+  
+  
+  #~ ------------
+  pldf <- data.frame( Date = ( date_decimal( taxis ) ) , reported=FALSE )
+  pldf$`Cumulative infections` = casesci[,1]
+  pldf$`2.5%` = casesci[,2]
+  pldf$`97.5%` = casesci[,3] 
+  
+  if( !(class(case_data$Date)=='Date') ){
+    stop('case_data Date variable must be class *Date*, not character, integer, or POSIXct. ') 
+  }
+  
+  case_data$reported = TRUE
+  
+  pldf <- merge( pldf, case_data , all = TRUE ) 
+  pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+  pldf$reporting <- lead(pldf$Cumulative, n=1L)/pldf$`Cumulative infections`
+  pldf$`rep97.5` <- pmin(lead(pldf$Cumulative, n=1L)/pldf$`2.5%`, 1)
+  pldf$`rep2.5` <- lead(pldf$Cumulative, n=1L)/pldf$`97.5%`
+  
+  pl = ggplot( pldf ) + 
+    geom_point(aes(x = Date, y = `reporting`*100, 
+                   group = !reported), lwd = 1.25) + 
+    geom_errorbar(aes(x = Date, ymin = `rep2.5`*100, ymax = `rep97.5`*100, group = !reported), size=0.8)+
+    theme_minimal()+
+    ylab("% cases reported")
+  
+  if (!is.null(path_to_save))
+    ggsave(pl, file = path_to_save)
+  
+  list(
+    pl = pl
+    , taxis = taxis 
+    , Il = Il
+    , Ih = Ih
+    , E = E 
+    , I = I 
+    , cases = cases 
+    , exog = exog 
+    , pldf =pldf 
+    , case_data = case_data 
+  )
+}
