@@ -244,7 +244,8 @@ write_phylo_metadata_yaml <- function(
   CoalescentConstantSubtreeSlide = T,
   CoalescentConstantNarrow = T,
   CoalescentConstantWide = T,
-  
+  school_closure_date = NULL,
+  lockdown_date = NULL,
   ...
   
 ) {
