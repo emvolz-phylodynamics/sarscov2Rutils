@@ -104,6 +104,7 @@ make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout=
   
   if(!is.null(plotout)){
     #trpl$edge.length <- pmax( 1e-6, trpl$edge.length / 29e3 )
+    library( phangorn )
     trroot <- tryCatch( { 
 		root(trpl, node=getRoot(tds[[1]]$intree)) # seems to raise error some times 
 	} , error = function(e){
@@ -169,6 +170,7 @@ add_starting_trees_to_xml <- function( xmlfn ,  fastafn , plotout='MLtree.png', 
   })
   if(!is.null(plotout)){
     #trpl$edge.length <- pmax( 1e-6, trpl$edge.length / 29e3 )
+    library( phangorn )
     trroot <- tryCatch( { 
 		root(trpl, node=getRoot(tds[[1]]$intree)) # seems to raise error some times 
 	} , error = function(e){
