@@ -112,17 +112,8 @@ name="alignment">
 					<matrixeq id="MatrixEquation.5" spec="phydyn.model.MatrixEquation" destination="IhExog" origin="exog" type="migration"> gamma0*exog*p_h</matrixeq>
 					<matrixeq id="MatrixEquation.21" spec="phydyn.model.MatrixEquation" origin="IlExog" type="death">gamma1 * IlExog</matrixeq>
 					<matrixeq id="MatrixEquation.22" spec="phydyn.model.MatrixEquation" origin="IhExog" type="death">gamma1 * IhExog</matrixeq>
-
-
-					<matrixeq id="MatrixEquation.20" spec="phydyn.model.MatrixEquation" destination="IhExog" origin="exog" type="birth">betaExog * IhExog</matrixeq>-->
 					 
 					<definition id="Definition.0" spec="phydyn.model.Definition" value=" beta = if (t &gt; SEIJR_START) then max(0.0, b) else 0.0 "/>
-
-
-					<!--
-					TODO Make betaExog an estimated parameter, get rid of exog growth rate 
-					-->
-                    
                     
                     
                     
