@@ -135,7 +135,7 @@ name="alignment">
                         <initialValue id="seir.IlExog.pv.t:algnl" spec="phydyn.model.ParamValue" pname="IlExog">
                             <parameter id="seir.IlExog.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
                         </initialValue>
-                        <initialValue id="seir.IhExog.pv.t:algn" spec="phydyn.model.ParamValue" pname="Ih">
+                        <initialValue id="seir.IhExog.pv.t:algn" spec="phydyn.model.ParamValue" pname="IhExog">
                             <parameter id="seir.IhExog.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
                         </initialValue>
 
