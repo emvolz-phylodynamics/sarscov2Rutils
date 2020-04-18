@@ -8,6 +8,8 @@ seijr_seeding :
 	- magnitude of max seeding 
 - there is also bidirectional migration at rate driven by regioal dynamics (same as seijr0 models)
 - sets initial epidemic size in region to zero and does not estimate this
+
+
 -->
 
 
@@ -49,14 +51,14 @@ name="alignment">
         <parameter id="clockRate.c:algn" spec="parameter.RealParameter" lower="5.0E-4" name="stateNode" upper="0.005">0.0015</parameter>
         <parameter id="kappa.s:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
         <parameter id="seir.p_h.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.2</parameter>
-        <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="5.0" name="stateNode">15.0</parameter>
+        <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="5.0" name="stateNode">20.0</parameter>
         <parameter id="seir.tau.t:algn" spec="parameter.RealParameter" name="stateNode">73.98393</parameter>
         <parameter id="seir.exogGrowthRate.t:algn" spec="parameter.RealParameter" name="stateNode">36.5</parameter>
         <parameter id="seir.importRate.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10.0">7.0</parameter>
-        <parameter id="seir.S.t:algn" spec="parameter.RealParameter" lower="10000.0" name="stateNode" >100000.0</parameter>
+        <parameter id="seir.S.t:algn" spec="parameter.RealParameter" lower="10000.0" name="stateNode" >1000000.0</parameter>
         <parameter id="seir.exog.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.01</parameter>
         <parameter id="freqParameter.s:algn" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
-        <parameter id="seir.seedingRate0.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="50.0">3.0</parameter>
+        <parameter id="seir.seedingRate0.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="5000.0">1000.0</parameter>
 		<parameter id="seir.seedingDecay.t:algn" spec="parameter.RealParameter" lower="250" name="stateNode" upper="3000.0">1000.0</parameter>
 		<parameter id="seir.tMaxSeeding.t:algn" spec="parameter.RealParameter" lower="2020.038" name="stateNode" upper="2020.25">2020.1</parameter> <!-- feb 7 -->
     </state>
@@ -153,7 +155,7 @@ name="alignment">
             </prior>
             <prior id="seir.S.prior.t:algn" name="distribution" x="@seir.S.t:algn">
                 <Exponential id="Exponential.8" name="distr">
-                    <parameter id="RealParameter.26" spec="parameter.RealParameter" estimate="false" name="mean">100000.0</parameter>
+                    <parameter id="RealParameter.26" spec="parameter.RealParameter" estimate="false" name="mean">1000000.0</parameter>
                 </Exponential>
             </prior>
             <prior id="seir.b.prior.t:algn" name="distribution" x="@seir.b.t:algn">
@@ -192,7 +194,7 @@ name="alignment">
             </prior>
             <prior id="seir.seedingRate0.prior.t:algn" name="distribution" x="@seir.seedingRate0.t:algn">
 				<Exponential id="Exponential.31" name="distr">
-					<parameter id="RealParameter.31" spec="parameter.RealParameter" lower="0.0" name="mean" upper="0.0">3.0</parameter>
+					<parameter id="RealParameter.31" spec="parameter.RealParameter" lower="0.0" name="mean" upper="0.0">250.0</parameter>
 				</Exponential>
 			</prior>
 			<prior id="seir.seedingDecay.prior.t:algn" name="distribution" x="@seir.seedingDecay.t:algn">
@@ -253,11 +255,11 @@ name="alignment">
 
     <operator id="seir.importRate.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.importRate.t:algn" useGaussian="true" weight="1.0" windowSize="1.0"/>
 
-    <operator id="seir.S.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.S.t:algn" useGaussian="true" weight="1.0" windowSize="5.0"/>
+    <operator id="seir.S.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.S.t:algn" useGaussian="true" weight="1.0" windowSize="50000.0"/>
 
     <operator id="seir.exog.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.exog.t:algn" useGaussian="true" weight="1.0" windowSize="0.05"/>
     
-    <operator id="seir.seedingRate0.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.seedingRate0.t:algn" useGaussian="true" weight="1.0" windowSize="0.10"/>
+    <operator id="seir.seedingRate0.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.seedingRate0.t:algn" useGaussian="true" weight="1.0" windowSize="50.0"/>
     <operator id="seir.seedingDecay.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.seedingDecay.t:algn" useGaussian="true" weight="1.0" windowSize="5.0"/>
     <operator id="seir.tMaxSeeding.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.tMaxSeeding.t:algn" useGaussian="true" weight="1.0" windowSize="0.01"/>
 

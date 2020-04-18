@@ -48,6 +48,8 @@ library( ggtree )
 #' @return Will write the starting tree and returns the treedater tree 
 #' @export 
 make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
+	library( treedater ) 
+	library ( ape ) 
 	tr <- .mltr( fn )
 
 	sts <- sapply( strsplit( tr$tip.label, '\\|' ), function(x){
@@ -81,7 +83,9 @@ make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
 #' @param ncpu Number of CPUs to use 
 #' @return Some treedater trees. New start trees are written to disk. ML tree plot written to disk
 #' @export
-make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
+make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout=NULL, regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
+	library( treedater ) 
+	library ( ape ) 
   if ( inherits( fastafn, 'phylo' )  )
     tr <- fastafn 
   else
@@ -105,6 +109,7 @@ make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout=
   if(!is.null(plotout)){
     #trpl$edge.length <- pmax( 1e-6, trpl$edge.length / 29e3 )
     library( phangorn )
+    library( ggtree )
     trroot <- tryCatch( { 
 		root(trpl, node=phangorn::getRoot(tds[[1]]$intree)) # seems to raise error some times 
 	} , error = function(e){
@@ -148,7 +153,7 @@ make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout=
 #' @param ncpu Number of CPUs to use 
 #' @return Some treedater trees. New XMLs are written to disk 
 #' @export
-add_starting_trees_to_xml <- function( xmlfn ,  fastafn , plotout='MLtree.png', regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
+add_starting_trees_to_xml <- function( xmlfn ,  fastafn , plotout=NULL, regionDemes=c('Il'), ntres = 1,  ncpu = 4 ){
   if ( inherits( fastafn, 'phylo' )  )
     tr <- fastafn 
   else
@@ -171,6 +176,7 @@ add_starting_trees_to_xml <- function( xmlfn ,  fastafn , plotout='MLtree.png', 
   if(!is.null(plotout)){
     #trpl$edge.length <- pmax( 1e-6, trpl$edge.length / 29e3 )
     library( phangorn )
+    library( ggtree )
     trroot <- tryCatch( { 
 		root(trpl, node=phangorn::getRoot(tds[[1]]$intree)) # seems to raise error some times 
 	} , error = function(e){
