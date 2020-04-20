@@ -53,31 +53,6 @@ invisible('
 
 
 
-#' Compute R0, growth rate and doubling time for the GMRF or SEIJR model (no difference in this case)
-#'
-#' Also prints to the screen a markdown table with the results. This can be copied into reports. 
-#' The tau & p_h parameters _must_ be in the log files. If that's not the case, you can add fixed values like this: X$seir.tau <- 74; X$seir.p_h <- .2
-#'
-#" @param X a data frame with the posterior trace, can be produced by 'combine_logs' function
-#' @param gamma0 Rate of leaving incubation period ( per capita per year )
-#' @param gamma1 Rate of recovery (per capita per year)
-#' @return Data frame with tabulated results and CI 
-#' @export 
-GMRF_SEIJR_reproduction_number <- SEIJR_reproduction_number
-
-
-#' Plot the cumulative infections through time from a GMRF SEIJR or SEIJR trajectory sample
-#' 
-#" Also computes CIs of various dynamic variables 
-#'
-#" @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
-#' @param case_data An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Cumulative'. Ensure Date is not a factor or character (see as.Date )
-#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
-#' @param path_to_save Will save a png here 
-#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
-#' @export 
-GMRF_SEIJR_plot_size =  SEIJR_plot_size
-
 
 #' Plot the daily new infections through time from a GMRF SEIJR trajectory sample
 #' 
@@ -298,13 +273,5 @@ print( changePoints )
 #~   , path_to_save='Rt.png'
 #~ )
 
-#' Plot reporting rate through time from SEIJR trajectory sample and reported cases
-#' 
-#'
-#' @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
-#' @param case_data dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )
-#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
-#' @param path_to_save Will save a png here 
-#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
-#' @export 
-GMRF_SEIJR_plot_reporting <- SEIJR_plot_reporting
+
+

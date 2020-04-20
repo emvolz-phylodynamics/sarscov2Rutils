@@ -9,6 +9,7 @@ SEIJR_plot_reporting(
   case_data,
   date_limits = c(as.Date("2020-02-01"), NA),
   path_to_save = "reporting.png",
+  errorbar = T,
   ...
 )
 }
@@ -20,6 +21,8 @@ SEIJR_plot_reporting(
 \item{date_limits}{a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories}
 
 \item{path_to_save}{Will save a png here}
+
+\item{errorbar}{T/F plotting of errorbars on each point}
 }
 \value{
 a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure

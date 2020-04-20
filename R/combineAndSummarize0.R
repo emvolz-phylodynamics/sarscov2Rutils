@@ -1,5 +1,3 @@
-
-
 #' Combine BEAST log files after removing burnin
 #'
 #" Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
@@ -81,9 +79,26 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 }
 
 
+# cite:Zwiers, F.W., and H. von Storch: Taking serial correlation into accountin tests of the mean.J. Climate 8:336 351 (1995).
+.test.diffpo <- function( x, y )
+{ 
+	ne = coda::effectiveSize( x ) 
+	me = coda::effectiveSize( y ) 
+	n = length( x ) 
+	m = length( y ) 
+	s = sqrt (  sum( sum((x-mean(x))^2) + sum((y-mean(y))^2)  ) / (n + m  -2)  )
+	.t = ( mean(y) - mean(x) ) / ( s * (1/sqrt(ne)  +   1/sqrt(me))  )
+	#print(.t) 
+	#print( c( ne , me ))
+	pp = pt( .t , df = ne + me - 2)
+	min( pp, 1 - pp )
+}
+
+
+
 #' Combine BEAST log AND trajectory files after removing burnin
 #'
-#" Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
+#' Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
 #' The 'Sample' column is modified and shared between the combined log and trajectory files so that they can be referenced against eachother
 #'
 #" @param logfns Vector of log files 
@@ -95,7 +110,7 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 #' @param pth Threshold p value for excluding logs based on sampled posterior values. If <0 will include all logs
 #' @return List with with combined logs and traj
 #' @export
-combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL, pth = -1){
+combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj = 200, ofn = NULL , ofntraj = NULL, pth = .01){
 	if ( length( logfns ) != length( trajfns))
 		stop('Provide *paired* log and traj files. These have different length.')
 	cat( 'These are the paired log and traj files provided\n')
@@ -107,37 +122,26 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 		i <- floor( burnProportion * nrow(d))
 		tail( d, nrow(d) - i )
 	})
-
+	
+	pps = NA 
 	if ( length( Xs ) > 1 ){
 		medlogpos <- sapply( Xs, function(X) median (X$posterior ))
-		#Xs <- Xs[ order( medlogpos, decreasing=TRUE ) ]
 		
-		xdf = data.frame(logpo = NULL, logfn = NULL ) 
-		k <- 0
-		for (X in Xs ){
-			k <- k + 1
-			xdf <- rbind ( xdf ,  data.frame( logpo = X$posterior , logfn = logfns[k] ) )
-		}
-
-		m <- aov(  logpo ~ logfn , data = xdf )
-		a <- TukeyHSD( m )
-		ps <- sapply( 1:(length(Xs)-1), function(k) {
-			a$logfn[ k, 4 ]
+		i <- which.max( medlogpos )
+		pps = sapply( (1:length(Xs)), function(k) {
+			pp = .test.diffpo( Xs[[i]]$posterior, Xs[[k]]$posterior )
 		})
-		keep <- c( 1, 1 + which ( ps > pth ) )
+		keep <- which(pps > pth )
 		for ( k in keep )
 			Xs[[k]]$Sample <- paste(sep='.', Xs[[k]]$Sample, k )
-		Xs1 <- Xs[ keep ]
 		
-		
-		X <- do.call( rbind, Xs1)
+		X <- do.call( rbind, Xs[keep])
 	} else{
 		k <- 1
 		Xs[[k]]$Sample <- paste(sep='.', Xs[[k]]$Sample, k )
 		X <- Xs[[1]]
 		keep <- 1
 	}
-	
 	# save comb log 	
 	if ( !is.null( ofn ))
 		saveRDS(X , file = ofn )
@@ -171,7 +175,7 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	print( logfns[keep] )
 	cat( "These traj files were retained:\n" )
 	print( trajfns[keep] )
-	list( log = X, traj = J , medlogpos = medlogpos, keep = keep )
+	list( log = X, traj = J , medlogpos = medlogpos, keep = keep, pps = pps , Xs = Xs  )
 }
 
 
@@ -707,3 +711,39 @@ SEIJR_plot_reporting <- function(trajdf
     , case_data = case_data 
   )
 }
+
+
+
+#' Compute R0, growth rate and doubling time for the GMRF or SEIJR model (no difference in this case)
+#'
+#' Also prints to the screen a markdown table with the results. This can be copied into reports. 
+#' The tau & p_h parameters _must_ be in the log files. If that's not the case, you can add fixed values like this: X$seir.tau <- 74; X$seir.p_h <- .2
+#'
+#" @param X a data frame with the posterior trace, can be produced by 'combine_logs' function
+#' @param gamma0 Rate of leaving incubation period ( per capita per year )
+#' @param gamma1 Rate of recovery (per capita per year)
+#' @return Data frame with tabulated results and CI 
+GMRF_SEIJR_reproduction_number <- SEIJR_reproduction_number
+
+
+#' Plot the cumulative infections through time from a GMRF SEIJR or SEIJR trajectory sample
+#' 
+#" Also computes CIs of various dynamic variables 
+#'
+#" @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
+#' @param case_data An optional dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Cumulative'. Ensure Date is not a factor or character (see as.Date )
+#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
+#' @param path_to_save Will save a png here 
+#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
+GMRF_SEIJR_plot_size =  SEIJR_plot_size
+
+
+#' Plot reporting rate through time from SEIJR trajectory sample and reported cases
+#' 
+#'
+#' @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
+#' @param case_data dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )
+#' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
+#' @param path_to_save Will save a png here 
+#' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
+GMRF_SEIJR_plot_reporting <- SEIJR_plot_reporting

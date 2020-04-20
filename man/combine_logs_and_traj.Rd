@@ -11,7 +11,7 @@ combine_logs_and_traj(
   ntraj = 200,
   ofn = NULL,
   ofntraj = NULL,
-  pth = -1
+  pth = 0.01
 )
 }
 \arguments{
@@ -29,5 +29,6 @@ combine_logs_and_traj(
 List with with combined logs and traj
 }
 \description{
+Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
 The 'Sample' column is modified and shared between the combined log and trajectory files so that they can be referenced against eachother
 }

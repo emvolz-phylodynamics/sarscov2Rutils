@@ -7,7 +7,7 @@
 make_starting_trees(
   fastafn,
   treeoutfn = "startTrees.nwk",
-  plotout = "MLtree.png",
+  plotout = NULL,
   regionDemes = c("Il"),
   ntres = 1,
   ncpu = 4

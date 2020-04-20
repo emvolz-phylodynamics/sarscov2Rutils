@@ -7,7 +7,7 @@
 add_starting_trees_to_xml(
   xmlfn,
   fastafn,
-  plotout = "MLtree.png",
+  plotout = NULL,
   regionDemes = c("Il"),
   ntres = 1,
   ncpu = 4
