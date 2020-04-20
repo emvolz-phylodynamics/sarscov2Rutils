@@ -128,7 +128,6 @@ mcc_tree_plot <- function( nexfn, mostRecentSampleDate, regionDemes = c( 'Il', '
 #' @param ofn Output file name of figure 
 #' @return A ggtree object which can be customized further
 #' @export 
-
 mcc_col_tree_plot <- function(nexfn
                               , mostRecentSampleDate
                               , country_dictionary
