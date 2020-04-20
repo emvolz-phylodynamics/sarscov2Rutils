@@ -615,7 +615,8 @@ SEIJR_plot_Rt <- function(trajdf
 #' @param trajdf Either a dataframe or a path to rds containing a data frame with a posterior sample of trajectories (see combine_traj)
 #' @param case_data dataframe containing reported/confirmed cases to be plotted alongside estimates. *Must* contain columns 'Date' and 'Confirmed'. Ensure Date is not a factor or character (see as.Date )
 #' @param date_limits  a 2-vector containing bounds for the plotting window. If the upper bound is missing, will use the maximum time in the trajectories
-#' @param path_to_save Will save a png here 
+#' @param path_to_save Will save a png here
+#' @param errorbar T/F plotting of errorbars on each point
 #' @return a list with derived outputs from the trajectories. The first element is a ggplot object if you want to further customize the figure 
 #' @export 
 
@@ -623,6 +624,7 @@ SEIJR_plot_reporting <- function(trajdf
                                  , case_data
                                  , date_limits = c( as.Date( '2020-02-01'), NA ) 
                                  , path_to_save='reporting.png'
+				 , errorbar = T
                                  , ...
 ) {
   library( ggplot2 ) 
@@ -681,10 +683,13 @@ SEIJR_plot_reporting <- function(trajdf
   
   pl = ggplot( pldf ) + 
     geom_point(aes(x = Date, y = `reporting`*100, 
-                   group = !reported), lwd = 1.25) + 
-    geom_errorbar(aes(x = Date, ymin = `rep2.5`*100, ymax = `rep97.5`*100, group = !reported), size=0.8)+
-    theme_minimal()+
+                   group = !reported), lwd = 1.25) +
+    ylim(0,100) +
+    theme_minimal() +
     ylab("% cases reported")
+  
+  if (errorbar == TRUE)
+     pl = pl + geom_errorbar(aes(x = Date, ymin = `rep2.5`*100, ymax = `rep97.5`*100, group = !reported), size=0.8)
   
   if (!is.null(path_to_save))
     ggsave(pl, file = path_to_save)
