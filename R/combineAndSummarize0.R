@@ -276,7 +276,7 @@ plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribu
   #parse dates/location 
   nex <- read.nexus(path_to_nex)
   algn3 = data.frame(seq_id = nex$tip.label) %>% 
-    separate(seq_id, c("hcov", "country", "region_code", "year", "EPI", "Date", "Date_2", "Region"), "[\\/\\|//]") %>% 
+    separate(seq_id, c("Seq_ID", "Epi", "Date", "Date_2", "Region"), "[|]") %>% 
     mutate(Region = ifelse(Region == "_Il", "Local", "Global")) %>% 
     mutate(Date = as.Date(Date, "%Y-%m-%d"))
   
