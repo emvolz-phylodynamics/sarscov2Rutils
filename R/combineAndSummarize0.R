@@ -261,6 +261,44 @@ write_phylo_metadata_yaml <- function(
 
 
 
+#' Sampling distribution of sequences
+#' 
+#' @param path_to_nex Path to mcc nexus tree
+#' @param path_to_save PNG saved here 
+
+plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribution.png' ) {
+  
+  library(tidyr)
+  library(dplyr)
+  library(ggplot2)
+  library(ape)
+  
+  #parse dates/location 
+  nex <- read.nexus(path_to_nex)
+  algn3 = data.frame(seq_id = nex$tip.label) %>% 
+    separate(seq_id, c("Seq_ID", "Epi", "Date", "Date_2", "Region"), "[|]") %>% 
+    mutate(Region = ifelse(Region == "_Il", "Local", "Global")) %>% 
+    mutate(Date = as.Date(Date, "%Y-%m-%d"))
+  
+  pl = ggplot(algn3, aes(x = Date, color= Region, fill = Region)) +
+    geom_histogram(aes(y=..density..), position="identity", 
+                   alpha=0.5, bins = as.numeric(max(algn3$Date)-min(algn3$Date)) + 1) +
+    geom_density(alpha=0.4) + 
+    theme_minimal() +
+    scale_color_manual(values=c( "#E69F00", "#999999"))+
+    scale_fill_manual(values=c( "#E69F00", "#999999"))+
+    labs(x="", y = "Sampling density")
+  
+  
+  if (!is.null(path_to_save))
+    ggsave(pl, file = path_to_save)
+  
+  return(pl)
+}
+
+
+
+
 #' Compute R0, growth rate and doubling time for the SEIJR.0.0 model 
 #'
 #' Also prints to the screen a markdown table with the results. This can be copied into reports. 
