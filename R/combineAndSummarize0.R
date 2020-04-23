@@ -263,7 +263,7 @@ write_phylo_metadata_yaml <- function(
 
 #' Sampling distribution of sequences
 #' 
-#' @param path_to_algn Path to mcc nexus tree
+#' @param path_to_nex Path to mcc nexus tree
 #' @param path_to_save PNG saved here 
 
 plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribution.png' ) {
