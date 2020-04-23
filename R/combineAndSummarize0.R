@@ -263,18 +263,19 @@ write_phylo_metadata_yaml <- function(
 
 #' Sampling distribution of sequences
 #' 
-#' @param path_to_algn Path to prep_tip_labels_phydyn aligment
+#' @param path_to_algn Path to mcc nexus tree
 #' @param path_to_save PNG saved here 
 
-plot_sample_distribution = function(path_to_algn, path_to_save = 'sample_distribution.png' ) {
+plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribution.png' ) {
   
   library(tidyr)
   library(dplyr)
   library(ggplot2)
+  library(ape)
   
   #parse dates/location 
-  
-  algn3 = data.frame(seq_id = names(read.FASTA(path_to_algn))) %>% 
+  nex <- read.nexus(path_to_nex)
+  algn3 = data.frame(seq_id = nex$tip.label) %>% 
     separate(seq_id, c("hcov", "country", "region_code", "year", "EPI", "Date", "Date_2", "Region"), "[\\/\\|//]") %>% 
     mutate(Region = ifelse(Region == "_Il", "Local", "Global")) %>% 
     mutate(Date = as.Date(Date, "%Y-%m-%d"))
@@ -292,6 +293,7 @@ plot_sample_distribution = function(path_to_algn, path_to_save = 'sample_distrib
   if (!is.null(path_to_save))
     ggsave(pl, file = path_to_save)
   
+  return(pl)
 }
 
 
