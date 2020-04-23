@@ -285,8 +285,8 @@ plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribu
                    alpha=0.5, bins = as.numeric(max(algn3$Date)-min(algn3$Date)) + 1) +
     geom_density(alpha=0.4) + 
     theme_minimal() +
-    scale_color_manual(values=c( "#E69F00", "#999999"))+
-    scale_fill_manual(values=c( "#E69F00", "#999999"))+
+    scale_color_manual(values=c("#999999","#E69F00"))+
+    scale_fill_manual(values=c( "#999999", "#E69F00"))+
     labs(x="", y = "Sampling density")
   
   
