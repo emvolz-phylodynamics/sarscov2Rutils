@@ -136,8 +136,8 @@ name="alignment">
             </prior>
             <prior id="seir.b.prior.t:algn" name="distribution" x="@seir.b.t:algn">
                 <LogNormal id="LogNormalDistributionModel.4" name="distr">
-                    <parameter id="RealParameter.11" spec="parameter.RealParameter" lower="0.0" name="M" upper="0.0">2.7</parameter>
-                    <parameter id="RealParameter.12" spec="parameter.RealParameter" lower="0.0" name="S" upper="0.0">0.5</parameter>
+                    <parameter id="RealParameter.11" spec="parameter.RealParameter" lower="0.0" name="M" upper="0.0">5.12</parameter>
+                    <parameter id="RealParameter.12" spec="parameter.RealParameter" lower="0.0" name="S" upper="0.0">0.75</parameter>
                 </LogNormal>
             </prior>
             <prior id="seir.exog.prior.t:algn" name="distribution" x="@seir.exog.t:algn">
