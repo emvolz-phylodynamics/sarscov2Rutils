@@ -33,7 +33,7 @@ name="alignment">
 <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-<run id="mcmc" spec="MCMC" chainLength="10000000">
+<run id="mcmc" spec="MCMC" chainLength="40000000">
     <state id="state" spec="State" storeEvery="5000">
         <tree id="Tree.t:algn" spec="beast.evolution.tree.Tree" name="stateNode">
             <trait id="dateTrait.t:algn" spec="beast.evolution.tree.TraitSet" traitname="date" value="DATE_TRAIT">
@@ -82,7 +82,7 @@ name="alignment">
                     <definition id="Definition.0" spec="phydyn.model.Definition" value=" N = S + Il + Ih + E + R  "/>
                     <definition id="Definition.1" spec="phydyn.model.Definition" value=" beta = if (t &gt; SEIJR_START  ) then max(0.0, b) else 0.0 "/>
                     <definition id="Definition.2" spec="phydyn.model.Definition" value=" betaExog =  gammaExog + exogGrowthRate "/>
-                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="200">
+                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="100">
                         <parameter id="seir.t0.t:algn" spec="parameter.RealParameter" estimate="false" name="t0">2019.7</parameter>
                         <initialValue id="seir.E.pv.t:algn" spec="phydyn.model.ParamValue" pname="E" pvalue="@seir.E.t:algn"/>
                         <initialValue id="seir.Il.pv.t:algnl" spec="phydyn.model.ParamValue" pname="Il">
