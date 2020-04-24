@@ -82,7 +82,7 @@ name="alignment">
 					
 					<matrixeq id="MatrixEquation.31" spec="phydyn.model.MatrixEquation" destination="Il" origin="exog" type="birth">seedingRate</matrixeq>
 
-                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="200">
+                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="100">
                         <parameter id="seir.t0.t:algn" spec="parameter.RealParameter" estimate="false" name="t0">2019.7</parameter>
                         <initialValue id="seir.Il.pv.t:algnl" spec="phydyn.model.ParamValue" pname="Il">
                             <parameter id="seir.Il.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
@@ -112,7 +112,7 @@ name="alignment">
 						<param id="seir.tMaxSeeding.pv.t:algn" spec="phydyn.model.ParamValue" pname="tMaxSeeding" pvalue="@seir.tMaxSeeding.t:algn"/>
                     </modelParams>
                 </popmodel>
-                <parameter id="seir.Ne.t:algn" spec="parameter.RealParameter" estimate="false" name="Ne">0.1</parameter>
+                <parameter id="seir.Ne.t:algn" spec="parameter.RealParameter" estimate="false" name="Ne">0.01</parameter>
                 <treeIntervals id="STreeIntervals.t:algn" spec="STreeIntervals" tree="@Tree.t:algn"/>
             </distribution>
             <prior id="ClockPrior.c:algn" name="distribution" x="@clockRate.c:algn">
