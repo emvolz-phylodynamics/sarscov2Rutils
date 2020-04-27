@@ -95,7 +95,6 @@ combine_traj <- function(trajfns, burnProportion = .50, ntraj = 100, ofn = NULL 
 }
 
 
-
 #' Combine BEAST log AND trajectory files after removing burnin
 #'
 #' Additionally, if some BEAST runs converged to a different tree space with different posterior, will exclude log files from runs with significantly lower posterior (analysis of variance)
@@ -118,20 +117,28 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	cat('****Make sure that these are paired correctly and each row corresponds to the same beast run****\n')
 	
 	Xs <- lapply( logfns, function(fn){
-		d = read.table( fn, header=TRUE, stringsAsFactors=FALSE) 
+		d = tryCatch( 
+			read.table( fn, header=TRUE, stringsAsFactors=FALSE) 
+		, error = function(e) return(NULL))
+		if (is.null(d))
+			return(NULL)
 		i <- floor( burnProportion * nrow(d))
 		tail( d, nrow(d) - i )
 	})
+	keep <- rep(FALSE, length(Xs ))
+	keep[ sapply( Xs, is.null) ] <- FALSE
 	
 	pps = NA 
 	if ( length( Xs ) > 1 ){
-		medlogpos <- sapply( Xs, function(X) median (X$posterior ))
-		
+		medlogpos <- sapply( Xs, function(X) if ( is.null(X)) return(-Inf) else median (X$posterior ))
 		i <- which.max( medlogpos )
 		pps = sapply( (1:length(Xs)), function(k) {
-			pp = .test.diffpo( Xs[[i]]$posterior, Xs[[k]]$posterior )
+			if ( is.null( Xs[[k]] ) )
+				return(-Inf)
+			.test.diffpo( Xs[[i]]$posterior, Xs[[k]]$posterior )
 		})
-		keep <- which(pps > pth )
+		keep[ pps > pth  ] <- TRUE
+		keep <- which(keep )
 		for ( k in keep )
 			Xs[[k]]$Sample <- paste(sep='.', Xs[[k]]$Sample, k )
 		
@@ -142,6 +149,9 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 		X <- Xs[[1]]
 		keep <- 1
 	}
+	
+	
+	
 	# save comb log 	
 	if ( !is.null( ofn ))
 		saveRDS(X , file = ofn )
@@ -154,7 +164,11 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	# now combine traj 
 	Js <- lapply( keep , function(k){
 		fn = trajfns[k]
-		d = read.table( fn, header=TRUE, stringsAsFactors=FALSE)
+		d = tryCatch( 
+			read.table( fn, header=TRUE, stringsAsFactors=FALSE)
+		, error = function(e) NULL)
+		if (is.null(d))
+			return(NULL)
 		ids = sort (unique( d$Sample ))
 		keepids <- tail(ids, floor(length(ids)-burnProportion*length(ids)))
 		keeptraj <- sample( keepids
@@ -177,6 +191,8 @@ combine_logs_and_traj <- function(logfns, trajfns, burnProportion = .5 , ntraj =
 	print( trajfns[keep] )
 	list( log = X, traj = J , medlogpos = medlogpos, keep = keep, pps = pps , Xs = Xs  )
 }
+
+
 
 
 
