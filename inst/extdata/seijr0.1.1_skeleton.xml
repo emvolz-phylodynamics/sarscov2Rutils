@@ -46,7 +46,7 @@ name="alignment">
         <parameter id="clockRate.c:algn" spec="parameter.RealParameter" lower="5.0E-4" name="stateNode" upper="0.005">0.0015</parameter>
         <parameter id="kappa.s:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
         <parameter id="seir.p_h.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.2</parameter>
-        <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="5.0" name="stateNode">15.0</parameter>
+        <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="10.0" name="stateNode">15.0</parameter>
         <parameter id="seir.tau.t:algn" spec="parameter.RealParameter" name="stateNode">73.98393</parameter>
         <parameter id="seir.exogGrowthRate.t:algn" spec="parameter.RealParameter" name="stateNode">36.5</parameter>
         <parameter id="seir.importRate.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10.0">7.0</parameter>
