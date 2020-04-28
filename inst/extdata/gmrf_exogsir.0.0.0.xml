@@ -82,7 +82,7 @@ name="alignment">
 					
 					<matrixeq id="MatrixEquation.31" spec="phydyn.model.MatrixEquation" destination="Il" origin="exog" type="birth">seedingRate</matrixeq>
 
-                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="100">
+                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="200">
                         <parameter id="seir.t0.t:algn" spec="parameter.RealParameter" estimate="false" name="t0">2019.7</parameter>
                         <initialValue id="seir.Il.pv.t:algnl" spec="phydyn.model.ParamValue" pname="Il">
                             <parameter id="seir.Il.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
