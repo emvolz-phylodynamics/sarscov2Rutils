@@ -33,7 +33,7 @@ region_sampler1 <- function( md
 		return(include)
 	
 	mdr = md[ match( include, md$seqName ), ]
-	sts <- lubridate::ymd( as.character( mdr$Collection.date))
+	sts <- lubridate::ymd( as.character( mdr$sampleDate))
 	names( sts ) <- include 
 	
 	if ( time_stratify )
@@ -112,7 +112,7 @@ exog_sampler1 <- function(
 	keep <- unique( keep )
 	
 	# time strat sample in exog 
-	sts <- lubridate::ymd( as.character( mde$Collection.date))
+	sts <- lubridate::ymd( as.character( mde$sampleDate))
 	names(sts) <- mde$seqName 
 	ssts = sort( sts )
 	N <- length(ssts)
@@ -142,7 +142,7 @@ prep_tip_labels_seijr <- function( algnfn , outfn , regiontips, exogtips, metada
 	d = read.dna( algnfn, 'fasta' )
 	s= intersect( c( regiontips, exogtips ) , rownames(d))
 	.md <- md [ match( s, md$seqName ) , ]
-	sts <- setNames( lubridate::decimal_date( lubridate::ymd( as.character( .md$Collection.date))), .md$seqName ) 
+	sts <- setNames( lubridate::decimal_date( lubridate::ymd( as.character( .md$sampleDate))), .md$seqName ) 
 	dd = d[s, ]
 	nms = rownames(dd)
 	demes <- setNames( rep( 'exog', length( nms ) ), nms )
