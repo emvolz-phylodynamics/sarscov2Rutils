@@ -33,7 +33,7 @@ region_sampler1 <- function( md
 		return(include)
 	
 	mdr = md[ match( include, md$seqName ), ]
-	sts <- lubridate::ymd( as.character( mdr$Collection.date))
+	sts <- lubridate::ymd( as.character( mdr$sampleDate))
 	names( sts ) <- include 
 	
 	if ( time_stratify )
@@ -112,7 +112,7 @@ exog_sampler1 <- function(
 	keep <- unique( keep )
 	
 	# time strat sample in exog 
-	sts <- lubridate::ymd( as.character( mde$Collection.date))
+	sts <- lubridate::ymd( as.character( mde$sampleDate))
 	names(sts) <- mde$seqName 
 	ssts = sort( sts )
 	N <- length(ssts)
