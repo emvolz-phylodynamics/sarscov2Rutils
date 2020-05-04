@@ -12,7 +12,8 @@
 #' @param region A title for the plots describing the region of analysis
 #' @param regionshort A short title that will go in file names 
 #' @param The output of a function to compute R(t), such as SEIJR_plot_Rt or gmrf_exogsir_plot_Rt
-#' \dontrun{
+#' @examples
+#'\dontrun{
 #' # load the mobility data:
 #' mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
 #' # extract new york: 
@@ -24,7 +25,7 @@
 #' X = readRDS('logs.rds' )
 #' # run it: 
 #' o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
-#' }
+#'}
 #' @return A list with the tabulated time series and outputs of pika::rolling_corr
 #' @export
 googmobility <- function(mobdf, J, X, region = '', regionshort='', rt = NULL ) 

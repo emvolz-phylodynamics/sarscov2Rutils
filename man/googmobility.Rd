@@ -17,7 +17,18 @@ googmobility(mobdf, J, X, region = "", regionshort = "", rt = NULL)
 
 \item{regionshort}{A short title that will go in file names}
 
-\item{The}{output of a function to compute R(t), such as SEIJR_plot_Rt or gmrf_exogsir_plot_Rt
+\item{The}{output of a function to compute R(t), such as SEIJR_plot_Rt or gmrf_exogsir_plot_Rt}
+}
+\value{
+A list with the tabulated time series and outputs of pika::rolling_corr
+}
+\description{
+This function requires the pika package https://github.com/mrc-ide/pika/
+NOTE this function computes the rolling correlation for a range of lag days, but does not currently use this information
+The lag data is returned. 
+If R(t) is out of sync with mobility, better correlations can be found by shifting the dates of the R(t) data
+}
+\examples{
 \dontrun{
 # load the mobility data:
 mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
@@ -30,14 +41,5 @@ J = readRDS('traj.rds' )
 X = readRDS('logs.rds' )
 # run it: 
 o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
-}}
 }
-\value{
-A list with the tabulated time series and outputs of pika::rolling_corr
-}
-\description{
-This function requires the pika package https://github.com/mrc-ide/pika/
-NOTE this function computes the rolling correlation for a range of lag days, but does not currently use this information
-The lag data is returned. 
-If R(t) is out of sync with mobility, better correlations can be found by shifting the dates of the R(t) data
 }
