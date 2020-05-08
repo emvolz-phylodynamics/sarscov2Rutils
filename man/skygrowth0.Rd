@@ -7,7 +7,7 @@
 skygrowth0(
   tds,
   tstart = decimal_date(as.Date("2020-02-15")),
-  tau0 = 7/365/3.65^2,
+  tau0 = 1/365/36.5^2,
   res = NULL,
   numpb = 10,
   ncpu = 6,

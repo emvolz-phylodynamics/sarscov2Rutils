@@ -19,7 +19,7 @@
 #' o = skygrowth0 ( tres, start = decimal_date( as.Date('2020-02-15') ) )
 #' }
 #' @export 
-skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), tau0 = 7/365 / 3.65^2, res = NULL,  numpb = 10, ncpu = 6, gamma1 = (-log(.5)) * 365 / 6.5, ...){
+skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), tau0 = 1/365 / 36.5^2, res = NULL,  numpb = 10, ncpu = 6, gamma1 = (-log(.5)) * 365 / 6.5, ...){
 	stopifnot( require( skygrowth )  )
 	library( lubridate )
 	
@@ -41,7 +41,8 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), ta
 		tr = drop.tip( tr, tr$tip[ grepl( tr$tip, patt='_exog' ) ]  ) 
 		.res <- res
 		if ( is.null( res )) # guess a good res based on sample size 
-			.res <- 10 + 30*max(0, min( (Ntip(tr) - 50)/(300-50), 1 ) )
+			.res <-  floor( 10 + 30*max(0, min( (Ntip(tr) - 50)/(300-50), 1 ) ) )
+		
 		a = capture.output( { 
 				sg = skygrowth.mcmc( tr , res = .res , tau0 = tau0, ... )# , mhsteps = 1e6)
 		})
@@ -87,21 +88,43 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), ta
 	)
 }
 
+#todo 
+.phylodyn <- function( tr ) {
+	tr = drop.tip( tr, tr$tip[ grepl( tr$tip, patt='_exog' ) ]  ) 
+	.res <- res
+	if ( is.null( res )) # guess a good res based on sample size 
+		.res <- 10 + 30*max(0, min( (Ntip(tr) - 50)/(300-50), 1 ) )
+	
+	phylodyn::BNPR( tr, lengthout = .res )
+}
+
 #~ library( ape ) 
 #~ tres = read.tree( 'startTrees.nwk' ) 
 #~ o = skygrowth0 ( tres[1:5], start = decimal_date( as.Date('2020-02-15') ) )
 
-
-plot.sarscov2skygrowth <- function()
+#' @export
+plot.sarscov2skygrowth <- function(x, ...)
 {
-	stop('not implemented')
-	#~ .xlim =  (c( as.Date('2020-02-15'), as.Date('2020-04-14') ))
-	.xlim =  (c( as.Date('2020-02-27'), as.Date('2020-04-14') ))
-	plot( taxis, sg$ne_ci[,2] , col='black', lty = 1, lwd = 2, ylim = range( sg$ne_ci ), log = 'y', type = 'l', xlim  = .xlim )
-	lines( taxis, sg$ne_ci[,1], col='black' , lty = 3 )
-	lines( taxis, sg$ne_ci[,3] , col='black', lty = 3)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$Ne 
+	taxis = as.Date( y$time )
+	plot( taxis, y$pc50 , col='black', lty = 1, lwd = 2, ylim = c( min( na.omit( y$pc2.5)) , max( na.omit(y$pc97.5)) ), type = 'l', xlab='', ylab='Ne(t)', ...)
+	lines( taxis, y$pc2.5, col='black' , lty = 3 )
+	lines( taxis,y$pc97.5 , col='black', lty = 3)
 }
 
+#' @export
+plotR.sarscov2skygrowth <- function(x, ...)
+{
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$R 
+	taxis = as.Date( y$time )
+	plot( taxis, y$pc50 , col='black', lty = 1, lwd = 2, ylim = c( min( na.omit( y$pc2.5)) , max( na.omit(y$pc97.5)) ), type = 'l', ylab = 'R(t)', xlab = '',  ...)
+	lines( taxis, y$pc2.5, col='black' , lty = 3 )
+	lines( taxis,y$pc97.5 , col='black', lty = 3)
+	abline( h = 1, col = 'red')
+}
+#~ plot.sarscov2skygrowthR( sg0 )
 
 #~ y = 4.125 * sg$ne_ci[,2] / (6.5/365)
 #~ taxis2 = seq( -.2, 0, length = 1e3 )
