@@ -131,9 +131,10 @@ plotR.sarscov2skygrowth <- function(x, ...)
 #~ plot.sarscov2skygrowthR( sg0 )
 
 #' @export 
-ggplot.sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
+ggNe_sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
 {
 	require(lubridate)
+	require(ggplot2)
 	stopifnot( inherits( x, 'sarscov2skygrowth' ))
 	y = x$Ne 
 	taxis = as.Date( y$time )
@@ -159,17 +160,9 @@ ggplot.sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01')
 #~ ggplot.sarscov2skygrowth( sg0 )
 
 #' @export 
-ggRplot.sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
+ggR_sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
 {
-
-	stopifnot( inherits( x, 'sarscov2skygrowth' ))
-	y = x$R 
-	taxis = as.Date( y$time )
-	plot( taxis, y$pc50 , col='black', lty = 1, lwd = 2, ylim = c( min( na.omit( y$pc2.5)) , max( na.omit(y$pc97.5)) ), type = 'l', ylab = 'R(t)', xlab = '',  ...)
-	lines( taxis, y$pc2.5, col='black' , lty = 3 )
-	lines( taxis,y$pc97.5 , col='black', lty = 3)
-	abline( h = 1, col = 'red')
-
+	require(ggplot2)
 	require(lubridate)
 	stopifnot( inherits( x, 'sarscov2skygrowth' ))
 	y = x$R
