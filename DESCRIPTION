@@ -1,8 +1,8 @@
 Package: sarscov2
 Type: Package
 Title: Scripts to support preparation and analysis of SARS CoV 2 analyses 
-Version: 0.0.26
-Date: 2020-05-03
+Version: 0.0.27
+Date: 2020-05-10
 Author: Erik M Volz, Lily Geidelberg, Manon Ragonnet, David Jorgensen 
 Maintainer: Erik M Volz <erik.volz@gmail.com>
 Description: Functions to filter and prepare special interest alignments and summarize beast analyses 

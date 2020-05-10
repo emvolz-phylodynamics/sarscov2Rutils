@@ -8,7 +8,7 @@
 #~ library( Hmisc)
 
 
-
+#' @export
 .compute_timports <- function(td){
 	library (ape )
 	library( treedater )

@@ -72,7 +72,9 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), ta
 	
 	Tg = 1/gamma1
 	# growthrate = (R0-1)/Tg
-	RCI =  pmax( GRCI[, c( 'pc2.5', 'pc50', 'pc97.5' ) ] * Tg + 1, 0 )
+	Rmat <-  GR*Tg + 1
+	Rmat[ Rmat < 0 ] <- 0#NA 
+	RCI =  t( apply( Rmat, MAR=1, FUN = function(x) quantile(na.omit(x), c(.025, .5, .975 )) ) )
 	colnames(RCI) = c( 'pc2.5', 'pc50', 'pc97.5' ) 
 	RCI = data.frame( time = dates, RCI )
 	
@@ -83,6 +85,8 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), ta
 	  , Ne = NeCI
 	  , growth= GRCI
 	  , R =RCI
+	  , GRmat = GR 
+	  , Rmat = Rmat 
 	)
 	, class = 'sarscov2skygrowth' 
 	)
@@ -125,6 +129,72 @@ plotR.sarscov2skygrowth <- function(x, ...)
 	abline( h = 1, col = 'red')
 }
 #~ plot.sarscov2skygrowthR( sg0 )
+
+#' @export 
+ggplot.sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
+{
+	require(lubridate)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$Ne 
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$Ne = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf ) + 
+	  geom_path( aes(x = Date, y = Ne ), lwd=1.25) + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 ) 
+	
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective population size ' ) 
+	pl
+}
+#~ ggplot.sarscov2skygrowth( sg0 )
+
+#' @export 
+ggRplot.sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
+{
+
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$R 
+	taxis = as.Date( y$time )
+	plot( taxis, y$pc50 , col='black', lty = 1, lwd = 2, ylim = c( min( na.omit( y$pc2.5)) , max( na.omit(y$pc97.5)) ), type = 'l', ylab = 'R(t)', xlab = '',  ...)
+	lines( taxis, y$pc2.5, col='black' , lty = 3 )
+	lines( taxis,y$pc97.5 , col='black', lty = 3)
+	abline( h = 1, col = 'red')
+
+	require(lubridate)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$R
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$R = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf ) + 
+	  geom_path( aes(x = Date, y = R ), lwd=1.25) + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 ) 
+	
+	pl <- pl + geom_hline( aes(yintercept = 1 ), colour = 'red' )
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective reproduction number' ) 
+	pl
+}
+#~ ggRplot.sarscov2skygrowth( sg0 )
 
 #~ y = 4.125 * sg$ne_ci[,2] / (6.5/365)
 #~ taxis2 = seq( -.2, 0, length = 1e3 )

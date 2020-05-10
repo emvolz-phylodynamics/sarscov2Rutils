@@ -1,58 +1,11 @@
 
-#' Compute time series cross correlations and plots using google mobility and R(t) estimates
-#'
-#' This function requires the pika package https://github.com/mrc-ide/pika/
-#' NOTE this function computes the rolling correlation for a range of lag days, but does not currently use this information
-#' The lag data is returned. 
-#' If R(t) is out of sync with mobility, better correlations can be found by shifting the dates of the R(t) data 
-#'
-#' @param mobdf A data frame with google mobility data for the selected region
-#' @param J Combined trajectory file from PhyDyn analysis 
-#' @param X Combined log file from PhyDyn analysis 
-#' @param region A title for the plots describing the region of analysis
-#' @param regionshort A short title that will go in file names 
-#' @param The output of a function to compute R(t), such as SEIJR_plot_Rt or gmrf_exogsir_plot_Rt
-#' @examples
-#'\dontrun{
-#' # load the mobility data:
-#' mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
-#' # extract new york: 
-#' mobdf <- mobdf0[ mobdf0$sub_region_1=='New York' & mobdf0$sub_region_2=='New York County', ]
-#' # make a nice header for the plot
-#' region = 'New York City, USA'
-#' # load the trajectory and log files:
-#' J = readRDS('traj.rds' ) 
-#' X = readRDS('logs.rds' )
-#' # run it: 
-#' o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
-#'}
-#' @return A list with the tabulated time series and outputs of pika::rolling_corr
-#' @export
-googmobility <- function(mobdf, J, X, region = '', regionshort='', rt = NULL ) 
+
+
+.crosscor_mob_result <- function( df1, region = '', regionshort='' )
 {
 	stopifnot( require( pika )  )
 	stopifnot( require( dplyr )  )
-	
-	
-	if (is.null(rt))
-		rt = SEIJR_plot_Rt(J,  X ) 
-	
-	df = rt$pldf 
-	df$Date = as.Date( df$Date ) 
-	colnames( df) <- c( 'date', 'reported', 'R', 'lb','ub' ) 
-	
-	mobdf$date = as.Date( as.character( mobdf$date ))
-	df1 = merge( df, mobdf, by.y='date' ) 
-	colnames(df1) = sapply( strsplit( colnames(df1 ), '_' ) , '[', 1 )
-	df1$grp = 1 
-	colnames(df1)[6] = 'country1'
-	colnames(df1)[8] = 'sub1'
-	
-	
-	mobnames = c( 'grocery', 'parks',  'transit', 'workplaces',  'residential' )
-	#~ scale( df1[, mobnames] )
-	df1[, mobnames ] <- scale( df1[, mobnames] )
-	df1[, 'parks_workplaces_grocery'] <- rowMeans( df1[, c('parks', 'workplaces', 'grocery') ] )
+	stopifnot( require( ggplot2 )  )
 	
 	lags <- cross_corr(dat = df1,
 	   date_var = "date",
@@ -114,16 +67,131 @@ googmobility <- function(mobdf, J, X, region = '', regionshort='', rt = NULL )
 	
 	list( data = df1 , transit = dctransit, residential = dcresidence , lags = lags )
 }
+
+
+#' Compute time series cross correlations and plots using google mobility and R(t) estimates
+#'
+#' This function requires the pika package https://github.com/mrc-ide/pika/
+#' NOTE this function computes the rolling correlation for a range of lag days, but does not currently use this information
+#' The lag data is returned. 
+#' If R(t) is out of sync with mobility, better correlations can be found by shifting the dates of the R(t) data 
+#'
+#' @param mobdf A data frame with google mobility data for the selected region
+#' @param J Combined trajectory file from PhyDyn analysis 
+#' @param X Combined log file from PhyDyn analysis 
+#' @param region A title for the plots describing the region of analysis
+#' @param regionshort A short title that will go in file names 
+#' @param rt The output of a function to compute R(t), such as SEIJR_plot_Rt or gmrf_exogsir_plot_Rt
+#' @examples
+#'\dontrun{
+#' # load the mobility data:
+#' mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
+#' # extract new york: 
+#' mobdf <- mobdf0[ mobdf0$sub_region_1=='New York' & mobdf0$sub_region_2=='New York County', ]
+#' # make a nice header for the plot
+#' region = 'New York City, USA'
+#' # load the trajectory and log files:
+#' J = readRDS('traj.rds' ) 
+#' X = readRDS('logs.rds' )
+#' # run it: 
+#' o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
+#'}
+#' @return A list with the tabulated time series and outputs of pika::rolling_corr
+#' @export
+googmobility <- function(mobdf, J, X, region = '', regionshort='', rt = NULL ) 
+{
+	stopifnot( require( pika )  )
+	stopifnot( require( dplyr )  )
+	
+	
+	if (is.null(rt))
+		rt = SEIJR_plot_Rt(J,  X ) 
+	
+	df = rt$pldf 
+	df$Date = as.Date( df$Date ) 
+	colnames( df) <- c( 'date', 'reported', 'R', 'lb','ub' ) 
+	
+	mobdf$date = as.Date( as.character( mobdf$date ))
+	df1 = merge( df, mobdf, by.y='date' ) 
+	colnames(df1) = sapply( strsplit( colnames(df1 ), '_' ) , '[', 1 )
+	df1$grp = 1 
+	colnames(df1)[6] = 'country1'
+	colnames(df1)[8] = 'sub1'
+	
+	
+	mobnames = c( 'grocery', 'parks',  'transit', 'workplaces',  'residential' )
+	#~ scale( df1[, mobnames] )
+	df1[, mobnames ] <- scale( df1[, mobnames] )
+	df1[, 'parks_workplaces_grocery'] <- rowMeans( df1[, c('parks', 'workplaces', 'grocery') ] )
+	
+	
+	.crosscor_mob_result( df1, region = region, regionshort=regionshort )
+}
+
+#' Compute time series cross correlations and plots using google mobility and R(t) estimates from the function skygrowth0
+#'
+#' This function requires the pika package https://github.com/mrc-ide/pika/
+#' NOTE this function computes the rolling correlation for a range of lag days, but does not currently use this information
+#' The lag data is returned. 
+#' If R(t) is out of sync with mobility, better correlations can be found by shifting the dates of the R(t) data 
+#'
+#' @param mobdf A data frame with google mobility data for the selected region
+#' @param sg0 Skygrowth output from function sarscov2::skygrowth0
+#' @param region A title for the plots describing the region of analysis
+#' @param regionshort A short title that will go in file names 
+#' @examples
+#'\dontrun{
+#' # load the mobility data:
+#' mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
+#' # extract new york: 
+#' mobdf <- mobdf0[ mobdf0$sub_region_1=='New York' & mobdf0$sub_region_2=='New York County', ]
+#' # make a nice header for the plot
+#' region = 'New York City, USA'
+#' # run it: 
+#' o = googmobility( mobdf, sg0, region = 'New York City, USA', regionshort='newyork'  )
+#'}
+#' @return A list with the tabulated time series and outputs of pika::rolling_corr
+#' @export
+googmobility_skygrowth <- function(mobdf, sg0, region = '', regionshort='' ) {
+	rtdf = sg0$R
+	#~  c( 'date', 'reported', 'R', 'lb','ub' ) 
+	rtdf$Date = as.Date( rtdf$time )
+	rtdf$date = as.Date( rtdf$time )
+	rtdf$reported = 1
+	rtdf$R = rtdf$pc50 
+	rtdf$lb = rtdf$pc2.5
+	rtdf$ub = rtdf$pc97.5 
+
+	df = rtdf[ , c( 'date', 'reported', 'R', 'lb','ub' )  ]
+	colnames( df) <- c( 'date', 'reported', 'R', 'lb','ub' ) 
+
+	mobdf$date = as.Date( as.character( mobdf$date ))
+	df1 = merge( df, mobdf, by.y='date' ) 
+	colnames(df1) = sapply( strsplit( colnames(df1 ), '_' ) , '[', 1 )
+	df1$grp = 1 
+	colnames(df1)[6] = 'country1'
+	colnames(df1)[8] = 'sub1'
+
+	mobnames = c( 'grocery', 'parks',  'transit', 'workplaces',  'residential' )
+	#~ scale( df1[, mobnames] )
+	df1[, mobnames ] <- scale( df1[, mobnames] )
+	df1[, 'parks_workplaces_grocery'] <- rowMeans( df1[, c('parks', 'workplaces', 'grocery') ] )
+	
+	.crosscor_mob_result( df1, region = region, regionshort=regionshort )
+}
+
+
+
 if (FALSE){
-# load the mobility data:
-mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
-# extract new york: 
-mobdf <- mobdf0[ mobdf0$sub_region_1=='New York' & mobdf0$sub_region_2=='New York County', ]
-# make a nice header for the plot
-region = 'New York City, USA'
-# load the trajectory and log files:
-J = readRDS('traj.rds' ) 
-X = readRDS('logs.rds' )
-# run it: 
-o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
+	# load the mobility data:
+	mobdf0 = read.csv( system.file( 'extdata/googmob-1may2020.csv', package = 'sarscov2' ) , stringsAs=FALSE)
+	# extract new york: 
+	mobdf <- mobdf0[ mobdf0$sub_region_1=='New York' & mobdf0$sub_region_2=='New York County', ]
+	# make a nice header for the plot
+	region = 'New York City, USA'
+	# load the trajectory and log files:
+	J = readRDS('traj.rds' ) 
+	X = readRDS('logs.rds' )
+	# run it: 
+	o = googmobility( mobdf, J, X, region = 'New York City, USA', regionshort='newyork' , rt = gmrf_exogsir_plot_Rt(J,  X )  )
 }
