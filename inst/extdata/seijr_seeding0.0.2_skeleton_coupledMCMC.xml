@@ -36,7 +36,7 @@ name="alignment">
 <map name="OneOnX" >beast.math.distributions.OneOnX</map>
 
 
-<run id="mcmc" spec="beast.coupledMCMC.CoupledMCMC" chainLength="10000000" chains="4" target="0.234" logHeatedChains="true" deltaTemperature="0.1" optimise="true" resampleEvery="1000" >
+<run id="mcmc" spec="beast.coupledMCMC.CoupledMCMC" chainLength="10000000" chains="4" target="0.234" logHeatedChains="false" deltaTemperature="0.1" optimise="true" resampleEvery="1000" >
     <state id="state" spec="State" storeEvery="5000">
         <tree id="Tree.t:algn" spec="beast.evolution.tree.Tree" name="stateNode">
             <trait id="dateTrait.t:algn" spec="beast.evolution.tree.TraitSet" traitname="date" value="DATE_TRAIT">
