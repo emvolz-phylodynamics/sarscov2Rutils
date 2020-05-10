@@ -390,6 +390,82 @@ region_time_stratified_sample <- function(region_regex, n, path_to_align, D = NU
 	d3
 }
 
+
+#' Select a random sample from aligment stratified through time 
+#' AND including close distance matches to a subset of sequences from a particular region
+#' All sequences from given location will be included 
+#'
+#' Select samples based on quantile of sample time distribution. Requires date to be at and of sequence label. Alternatively can do a simple random sample within a region
+#'
+#' @param region_regex Sample names matching this regular expression will be retained and closest matches also retained
+#" @param path_to_align A DNAbin alignment *or* a system path (type character) where original alignment can be found, such as /gisaid/gisaid_cov2020_sequences_March14_aligned.fas
+#' @param smallGDpairs A data frame or path to csv containing <ID1 ID2 Distance> such as produced by the 'tn93' tool 
+#' @param path_to_save Where to store (as fasta) the filtered alignment
+#' @param n sample size from outside region 
+#' @param nregion sample size within region; if null will include everything in region
+#' @param q_threshold Clock outlier threshold 
+#' @param minEdge minimum branch length (substitutions per site) to stabilize clock inference 
+#' @param time_stratify_region If TRUE (default) will perform a time stratified sample within region, otherwise will do a simple random sample 
+#' 
+#' @return A DNAbin alignment. Will also save to path_to_save 
+#' @export 
+region_time_stratified_sample1 <- function(region_regex, n, path_to_align, smallGDpairs, nregion = NULL,  path_to_save = NULL, time_stratify_region=TRUE ) {
+	library( ape ) 
+	library( treedater )
+	library( lubridate )
+
+	if ( inherits( path_to_align, 'DNAbin' ) )
+		d = path_to_align
+	else
+		d = read.dna( path_to_align, format = 'fasta')
+	if ( is.character( smallGDpairs ))
+		smallGDpairs = read.csv( smallGDpairs, stringsAs=FALSE )
+	
+	dr = d[ grepl(pattern= region_regex, x = rownames(d), perl = TRUE ) , ]
+	dnr = d[ setdiff( rownames(d), rownames(dr)), ]
+	
+	stsdr <- sapply( strsplit( rownames(dr), '\\|' ) , function(x){
+		decimal_date( ymd( tail(x,1)))
+	})
+	names( stsdr ) <- rownames( dr )
+	mrsid = names( stsdr )[ which.max( stsdr ) ] # most recent in region 
+	
+	nr <- nrow(dr ) 
+	if (!is.null( nregion )){
+		if ( nregion < nr ){
+			if ( time_stratify_region){
+				#dr <- dr[ sample( rownames(dr), replace=FALSE, size = nregion), ]
+				dr <- time_stratified_sample(nregion, dr, path_to_save = NULL )$alignment
+			} else{ # do a simple random sample in region 
+				include = sample( setdiff( rownames(dr), mrsid ), size = nregion-1, replace=FALSE )
+				include <- c( include, mrsid )
+				dr <- dr[ include , ] 
+			}
+		}
+	}
+	
+	rsgdp = smallGDpairs[ smallGDpairs$ID1 %in% rownames(dr), ]
+	keep <- c() 
+	us = intersect( rsgdp$ID1, rownames(dr) )
+	if ( length( us ) > 0 ){
+		keep <- sapply( us , function(u) {
+			rsgdp1 = rsgdp[ rsgdp$ID1==u, ]
+			rsgdp1$ID2[ which.min( rsgdp1$Distance )[1] ]
+		})
+	}
+	
+	keep <- c( rownames( dr ), keep )
+	
+	dr2 = d[ keep, ]
+	dnr2 = d[ setdiff( rownames(d), keep ), ]
+	o2 = time_stratified_sample(n, dnr2, path_to_save = NULL )
+	d3 = rbind( dr2, o2$alignment )
+	if ( !is.null( path_to_save ))
+		write.dna( d3, file = path_to_save, format = 'fasta' )
+	
+	d3
+}
+
 #' Change the name of sequences to recognize numeric time of sampling and deme 
 #'
 #' @param path_to_algn A DNAbin alignment *or* a system path (type character) where original alignment can be found
