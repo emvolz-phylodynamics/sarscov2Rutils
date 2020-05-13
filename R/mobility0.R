@@ -27,7 +27,7 @@
 		  , lty = 1 
 		  , lwd= c( 4, 2, 2, 2)
 		) 
-		legend( x = 'topleft', y = NULL,   c('R', 'transit', 'residential', 'other') , col = 1:4, lty = 1)
+		legend( x = 'topright', y = NULL,   c('R', 'transit', 'residential', 'other') , col = 1:4, lty = 1)
 	}
 	
 	.corplot <- function(yvar = 'transit')

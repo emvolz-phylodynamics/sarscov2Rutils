@@ -174,6 +174,7 @@ exog_sampler2 <- function(
 	# find close matches 
 	nregion <- length( region_sample )
 	rsgdp = smallGDpairs[ smallGDpairs$ID1 %in% region_sample, ]
+	rsgdp = rsgdp[ rsgdp$ID2 %in% mde$seqName, ] # do not match to exclude , filter out dup's if applicable 
 	keep <- c() 
 	us = intersect( rsgdp$ID1, region_sample )
 	if ( length( us ) > 0 ){

@@ -44,8 +44,8 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), ta
 			.res <-  floor( 10 + 30*max(0, min( (Ntip(tr) - 50)/(300-50), 1 ) ) )
 		
 		a = capture.output( { 
-				sg = skygrowth.mcmc( tr , res = .res , tau0 = tau0, ... )# , mhsteps = 1e6)
-		})
+				sg = skygrowth.mcmc( tr , res = .res , tau0 = tau0, logRmean = log(0.70), logRsd = .5, gamma = gamma1, ... )# , mhsteps = 1e6)
+		}) 
 		sg
 	}
 	
