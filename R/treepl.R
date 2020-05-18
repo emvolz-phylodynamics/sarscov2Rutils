@@ -210,7 +210,7 @@ mcc_col_tree_plot <- function(nexfn
         
     }
 
-  ggsave( btr, file= "mcc2.png" , width = 4, height=7)
+  ggsave( btr, file= ofn , width = 4, height=7)
   return(btr)
 }
 # mcc_col_tree_plot("./mcc.nex", "2020-03-29", "country_dict.txt", internal = "Reykjavik", style = 3)
