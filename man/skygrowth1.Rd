@@ -9,11 +9,13 @@ skygrowth1(
   X = NULL,
   formula = ~transit_stations_percent_change_from_baseline,
   tstart = decimal_date(as.Date("2020-03-01")),
-  tau0 = 1/365/36.5^2,
-  res = NULL,
+  tau0 = 30/365/36.5^2,
+  res = 5,
   numpb = 10,
   ncpu = 6,
   gamma1 = (-log(0.5)) * 365/6.5,
+  logRmean = NULL,
+  logRsd = 0.5,
   ...
 )
 }

@@ -6,7 +6,7 @@
 \usage{
 skygrowth0(
   tds,
-  tstart = decimal_date(as.Date("2020-02-15")),
+  tstart = decimal_date(as.Date("2020-03-01")),
   tau0 = 1/365/36.5^2,
   res = NULL,
   numpb = 10,

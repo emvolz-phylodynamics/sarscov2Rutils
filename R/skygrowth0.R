@@ -19,7 +19,7 @@
 #' o = skygrowth0 ( tres, start = decimal_date( as.Date('2020-02-15') ) )
 #' }
 #' @export 
-skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-02-15') ), tau0 = 1/365 / 36.5^2, res = NULL,  numpb = 10, ncpu = 6, gamma1 = (-log(.5)) * 365 / 6.5, ...){
+skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-03-01') ), tau0 = 1/365 / 36.5^2, res = NULL,  numpb = 10, ncpu = 6, gamma1 = (-log(.5)) * 365 / 6.5, ...){
 	stopifnot( require( skygrowth )  )
 	library( lubridate )
 	
@@ -124,7 +124,13 @@ skygrowth1 <- function( tds
  , X = NULL
  , formula = ~ transit_stations_percent_change_from_baseline
  , tstart = decimal_date( as.Date('2020-03-01') )
- , tau0 = 1/365 / 36.5^2, res = NULL,  numpb = 10, ncpu = 6, gamma1 = (-log(.5)) * 365 / 6.5
+ , tau0 = 30/365 / 36.5^2
+ , res = 5
+ , numpb = 10
+ , ncpu = 6
+ , gamma1 = (-log(.5)) * 365 / 6.5
+ , logRmean = NULL #log(0.70)
+ , logRsd = 0.5 
  , ...
 ){
 	stopifnot( require( skygrowth )  )
@@ -141,6 +147,7 @@ skygrowth1 <- function( tds
 	tres = lapply( tds, function(x) { class(x)='phylo'; x } )
 	
 	tr <- tres[[1]] 
+	tr = drop.tip( tr, tr$tip[ grepl( tr$tip, patt='_exog' ) ]  ) 
 	sts = sapply( strsplit( tr$tip, '\\|') , function(x) as.numeric( tail(x,2)[1] ) )
 	msts = max( sts ) 
 	mh = msts - tstart 
@@ -160,20 +167,29 @@ skygrowth1 <- function( tds
 					   , res = .res
 					   , maxHeight = mh
 					   , gamma = gamma1
-					   ,  logRmean = log(0.70), logRsd = .5
+					   , logRmean = logRmean, logRsd = logRsd
 					   , ...
 					)
 			})  
 		} else{
 			a = capture.output( { 
-					sg = skygrowth.mcmc( tr , res = .res , tau0 = tau0, logRmean = log(0.70), logRsd = .5, gamma = gamma1, maxHeight = mh, ... )# , mhsteps = 1e6)
+				sg = skygrowth.mcmc( tr , res = .res , tau0 = tau0, logRmean = logRmean, logRsd = logRsd, gamma = gamma1, maxHeight = mh, ... )
 			}) 
 		}
 		sg
 	}
 	
 	
-	sgs = parallel::mclapply( tres, .skygrowth, mc.cores = ncpu  )
+	sgs = parallel::mclapply( tres, function(tr){
+		tryCatch( .skygrowth(tr), error = function(e) NULL)
+	}
+	, mc.cores = ncpu  )
+	inull = which( sapply( sgs, is.null) )
+	if (length(inull)>0){
+		warning( paste(  'Some skygrowth fits failed corresponding to trees:', paste(inull, collapse=',') ) )
+		sgs = sgs[-inull]
+	}
+	
 	taxis = seq( tstart, msts , length =  floor((msts - tstart)*365) )
 	dates = date_decimal( taxis )
 	
@@ -183,6 +199,7 @@ skygrowth1 <- function( tds
 	}))
 	NeCI = t( apply( Ne, MAR=1, FUN = function(x) quantile(x, c(.025, .5, .975 )) ) )
 	colnames(NeCI)= c( 'pc2.5', 'pc50', 'pc97.5' ) 
+	NeCI [ NeCI > 100000 ] <- NA 
 	NeCI = data.frame( time = dates, NeCI )
 	
 	# growth rate 
@@ -315,7 +332,51 @@ ggR_sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), N
 	 ylab ('Effective reproduction number' ) 
 	pl
 }
-#~ ggRplot.sarscov2skygrowth( sg0 )
+
+#' Combine Reff plots for two skygrowth fits, for example comparing s614 G and D clades 
+#'
+#' @param x skygrowth1 fit 
+#' @param x1 skygrowth1 fit 
+#' @param ... additional arguments passed to ggplot
+#' @export
+add_ggR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '2020-03-01'), NA ) ,... )
+{
+	require(ggplot2)
+	require(lubridate)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$R
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$R = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf , ... ) + 
+	  geom_path( aes(x = Date, y = R ), lwd=1.25, col = 'blue') + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 , fill = 'blue', lwd = 0) 
+	
+	pl <- pl + geom_hline( aes(yintercept = 1 ), colour = 'black' )
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective reproduction number' ) 
+	
+	y = x1$R 
+	pldf1 <- data.frame( Date = as.Date( y$time ) , reported=FALSE )
+	pldf1$R = y$pc50
+	pldf1$`2.5%` = y$pc2.5
+	pldf1$`97.5%` = y$pc97.5
+	
+	pl + geom_ribbon( data = pldf1, aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25  , fill= 'red', lwd=0) + 
+	  geom_path( data = pldf1, aes( x = Date , y = R ), lwd=1.25, col = 'red' )
+}
+
+#~ p1 = add_ggR_sarscov2skygrowth( p, o$sgD, o$sgG )
+
 
 #~ y = 4.125 * sg$ne_ci[,2] / (6.5/365)
 #~ taxis2 = seq( -.2, 0, length = 1e3 )
