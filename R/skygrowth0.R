@@ -333,6 +333,35 @@ ggR_sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-02-01'), N
 	pl
 }
 
+#' @export 
+ggGR_sarscov2skygrowth <- function(x,  date_limits = c( as.Date( '2020-03-01'), NA ) ,... )
+{
+	require(ggplot2)
+	require(lubridate)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$growth
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$R = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf ) + 
+	  geom_path( aes(x = Date, y = R ), lwd=1.25) + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 ) 
+	
+	pl <- pl + geom_hline( aes(yintercept = 1 ), colour = 'red' )
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective growth rate' ) 
+	pl
+}
+
 #' Combine Reff plots for two skygrowth fits, for example comparing s614 G and D clades 
 #'
 #' @param x skygrowth1 fit 
@@ -374,6 +403,86 @@ add_ggR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '202
 	pl + geom_ribbon( data = pldf1, aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25  , fill= 'red', lwd=0) + 
 	  geom_path( data = pldf1, aes( x = Date , y = R ), lwd=1.25, col = 'red' )
 }
+
+#' Combine growth plots for two skygrowth fits, for example comparing s614 G and D clades 
+#'
+#' @param x skygrowth1 fit 
+#' @param x1 skygrowth1 fit 
+#' @param ... additional arguments passed to ggplot
+#' @export
+add_ggGR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '2020-03-01'), NA ) ,... )
+{
+	require(ggplot2)
+	require(lubridate)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$growth
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$R = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf , ... ) + 
+	  geom_path( aes(x = Date, y = R ), lwd=1.25, col = 'blue') + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 , fill = 'blue', lwd = 0) 
+	
+	pl <- pl + geom_hline( aes(yintercept = 1 ), colour = 'black' )
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective growth rate' ) 
+	
+	y = x1$growth 
+	pldf1 <- data.frame( Date = as.Date( y$time ) , reported=FALSE )
+	pldf1$R = y$pc50
+	pldf1$`2.5%` = y$pc2.5
+	pldf1$`97.5%` = y$pc97.5
+	
+	pl + geom_ribbon( data = pldf1, aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25  , fill= 'red', lwd=0) + 
+	  geom_path( data = pldf1, aes( x = Date , y = R ), lwd=1.25, col = 'red' )
+}
+
+#' @export 
+add_ggNe_sarscov2skygrowth <- function(x, x1,  date_limits = c( as.Date( '2020-02-01'), NA ) ,... )
+{
+	require(lubridate)
+	require(ggplot2)
+	stopifnot( inherits( x, 'sarscov2skygrowth' ))
+	y = x$Ne 
+	taxis = as.Date( y$time )
+	
+	if ( is.na( date_limits[2]) )
+		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+	#qs <- c( .5, .025, .975 )
+	
+	pldf <- data.frame( Date = taxis , reported=FALSE )
+	pldf$Ne = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	
+	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
+	pl = ggplot( pldf ) + 
+	  geom_path( aes(x = Date, y = Ne ), lwd=1.25) + 
+	  geom_ribbon( aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25 ) 
+	
+	y = x1$Ne 
+	pldf <- data.frame( Date =  as.Date( y$time ) , reported=FALSE )
+	pldf$Ne = y$pc50
+	pldf$`2.5%` = y$pc2.5
+	pldf$`97.5%` = y$pc97.5
+	pl = pl + geom_ribbon( data = pldf, aes(x = Date, ymin=`2.5%`, ymax=`97.5%`) , alpha = .25  , fill= 'red', lwd=0) + 
+	  geom_path( data = pldf, aes( x = Date , y = Ne ), lwd=1.25, col = 'red' )
+	
+	
+	pl <- pl + theme_minimal()  + xlab('') + 
+	 ylab ('Effective population size ' ) 
+	pl
+}
+
 
 #~ p1 = add_ggR_sarscov2skygrowth( p, o$sgD, o$sgG )
 

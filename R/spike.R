@@ -78,3 +78,4 @@ s614_phylodynamics <- function( tds, s614 , ... )
 #~ s614 = readRDS('s614df.rds' ) 
 #~ tds = readRDS('tds.rds' ) 
 #~ o = s614_phylodynamics( tds, s614 )
+

@@ -70,7 +70,7 @@
 	 , yplus = apply( yp, MAR=1, FUN = function(x) unname( quantile(x, .975)) )
 	)
 	pldf <- pldf [ pldf$y > excludeBefore , ]
-	pldf 
+	list(pldf =pldf , tis = tis )
 }
 #~ pldf = .compute_timports_pb( tds[[1]], numpb=100 )
 
@@ -140,8 +140,11 @@ compute_timports <- function(tds, numpb = 100, ncpu = 6, excludeBefore = 2020 ){
 	if (class( tds ) == 'treedater' )
 		tds <- list( tds )
 	ntds <- length( tds )
-	pldfs <- lapply( tds, function(td) .compute_timports_pb( td, numpb, ncpu , excludeBefore = excludeBefore) )
-	do.call(rbind, pldfs )
+	results <- lapply( tds, function(td) .compute_timports_pb( td, numpb, ncpu , excludeBefore = excludeBefore) )
+	pldfs <- lapply( results, '[[', 'pldf' )
+	tis <- lapply( results, '[[', 'tis' )
+	pldf <- do.call(rbind, pldfs )
+	list( pldf = pldf, tis = tis )
 }
 
 

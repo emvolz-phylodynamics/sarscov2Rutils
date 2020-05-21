@@ -312,6 +312,39 @@ plot_sample_distribution = function(path_to_nex, path_to_save = 'sample_distribu
   return(pl)
 }
 
+#' Plot sample times for D and G genotypes  on spike 614 
+#' 
+#' @param s614 data frame produced by compute_spike614genotype, also element $s614 produced by s614_phylodynamics 
+#' @export 
+plot_sample_distribution_spike614 = function(s614, path_to_save = 'sample_distribution.png' ) 
+{
+  
+  library(tidyr)
+  library(dplyr)
+  library(ggplot2)
+  library(ape)
+  
+  #parse dates/location 
+  algn3 = data.frame( Seq_ID = rownames(s614) 
+	  , Date = as.numeric( sapply( strsplit( rownames(s614), '\\|'), function(x) tail(x,2)[1] ) )
+	  , Genotype = s614$s614 
+	)
+  
+  pl = ggplot(algn3, aes(x = Date, color= Genotype, fill = Genotype)) +
+#~     geom_histogram(aes(y=..density..), position="identity", 
+#~                    alpha=0.5, bins = as.numeric(max(algn3$Date)-min(algn3$Date)) + 1) +
+    geom_density(alpha=0.4) + 
+    theme_minimal() +
+    scale_color_manual(values=c("#999999","#E69F00"))+
+    scale_fill_manual(values=c( "#999999", "#E69F00"))+
+    labs(x="", y = "Sampling density")
+  
+  
+  if (!is.null(path_to_save))
+    ggsave(pl, file = path_to_save)
+  
+  return(pl)
+}
 
 
 
