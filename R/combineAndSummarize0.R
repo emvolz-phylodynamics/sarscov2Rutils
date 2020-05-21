@@ -324,6 +324,9 @@ plot_sample_distribution_spike614 = function(s614, path_to_save = 'sample_distri
   library(ggplot2)
   library(ape)
   
+  i <- as.character( s614$s614 ) %in% c( 'G', 'D' )
+  X <- data.frame( s614 = as.character( s614[ i, 's614'] ), row.names = rownames(s614 )[i] )
+  s614 = X 
   #parse dates/location 
   algn3 = data.frame( Seq_ID = rownames(s614) 
 	  , Date = as.numeric( sapply( strsplit( rownames(s614), '\\|'), function(x) tail(x,2)[1] ) )

@@ -13,7 +13,7 @@ compute_spike614genotype <- function( algnfn, algnfn2 = 'standard_coords.fasta' 
 	file.copy( system.file( 'extdata/ref.fasta' , package = 'sarscov2'), reffn )
 	file.copy( system.file( 'extdata/spikeref.fasta' , package = 'sarscov2'), spikereffn )
 	
-	system( paste( 'mafft --keeplength --add', algnfn, reffn , ' > ' , algnfn2) )
+	system( paste( 'mafft --thread -1 --keeplength --add', algnfn, reffn , ' > ' , algnfn2) )
 		
 	library( seqinr )
 	spike_coords <- 21563:25384
