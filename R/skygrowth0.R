@@ -410,7 +410,7 @@ add_ggR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '202
 #' @param x1 skygrowth1 fit 
 #' @param ... additional arguments passed to ggplot
 #' @export
-add_ggGR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '2020-03-01'), NA ) ,... )
+add_ggGR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c(-Inf, Inf) , ... )
 {
 	require(ggplot2)
 	require(lubridate)
@@ -419,14 +419,13 @@ add_ggGR_sarscov2skygrowth <- function(  x,  x1 ,  date_limits = c( as.Date( '20
 	taxis = as.Date( y$time )
 	
 	if ( is.na( date_limits[2]) )
-		date_limits[2] <- as.Date( date_decimal( max(taxis)  ) )
+		date_limits[2] <- max(taxis) 
 	#qs <- c( .5, .025, .975 )
 	
 	pldf <- data.frame( Date = taxis , reported=FALSE )
 	pldf$R = y$pc50
 	pldf$`2.5%` = y$pc2.5
 	pldf$`97.5%` = y$pc97.5
-	
 	pldf <- pldf[ with( pldf, Date > date_limits[1] & Date <= date_limits[2] ) , ]
 	pl = ggplot( pldf , ... ) + 
 	  geom_path( aes(x = Date, y = R ), lwd=1.25, col = 'blue') + 
