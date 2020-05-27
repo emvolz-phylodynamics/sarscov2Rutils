@@ -1,7 +1,7 @@
 Package: sarscov2
 Type: Package
 Title: Scripts to support preparation and analysis of SARS CoV 2 analyses 
-Version: 0.0.31
+Version: 0.0.32
 Date: 2020-05-21
 Author: Erik M Volz, Lily Geidelberg, Manon Ragonnet, David Jorgensen 
 Maintainer: Erik M Volz <erik.volz@gmail.com>

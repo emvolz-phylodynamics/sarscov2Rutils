@@ -266,7 +266,7 @@ name="alignment">
     </logger>
 
     <logger id="popTrajLog" spec="Logger" fileName="seir.algn.traj" logEvery="10000">
-        <log id="trajectoryLogger" spec="phydyn.loggers.TrajectoryLogger" pointFrequency="1" popModel="@pdseirmodel.t:algn"/>
+        <log id="trajectoryLogger" spec="phydyn.loggers.TrajectoryLogger" pointFrequency="1" popModel="@pdseirmodel.t:algn" logrates="all"/>
     </logger>
 
     <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>

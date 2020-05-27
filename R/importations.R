@@ -7,6 +7,75 @@
 #~ library( phangorn )
 #~ library( Hmisc)
 
+#' Extact all clades in given tree descended from nodes with high confidece of being within region (parsimony)
+#'
+#' @export
+region_clades<- function(td){
+	library (ape )
+	library( treedater )
+	library( phangorn )
+	tr2 <- td ; class(tr2) = 'phylo'
+	tr2$tip.label <- unname( tr2$tip.label ) 
+	
+	
+	if (! ( 'sts' %in% names(tr2))){
+		sts = as.numeric( sapply( strsplit( tr2$tip.label, '\\|'), function(x) tail(x, 2)[1] ) ) 
+		tr2$sts = sts 
+	}
+	if (! ('Ti' %in% names(tr2) ) ){
+		nel = node.depth.edgelength( tr2 ) 
+		nel <- nel - max(nel) + max( tr2$sts )
+		tr2$Ti <-  nel [ (Ntip(tr2)+1) : (Ntip(tr2)+Nnode(tr2) ) ]
+	}
+	
+	region <- sapply( strsplit( tr2$tip.label, '_' ), function(x) tail(x,1))
+	names(region) <- tr2$tip.label
+	
+	region_levels <- c('Il', 'exog')
+	region_pd <- as.phyDat(region, type ='USER' , levels = region_levels )
+	
+	ancestral.pars(tr2, region_pd ) -> region_ap
+	#plotAnc(tr2,  region_ap, cex = 0) 
+
+	nodeStates = ns <- t( sapply(  subset(region_ap, select = 1, site.pattern = TRUE), as.numeric ) )
+	iedge = rev( postorder( tr2 ) )
+	
+	ismrca_region = rep(FALSE, Nnode(tr2) + Ntip( tr2 ))
+	rootnode = tr2$edge[iedge[1],1]
+	
+	region_ancestor = rep( NA, Nnode(tr2) + Ntip( tr2 ))
+	
+	for ( k in 1:length( iedge )){
+		i <- iedge[k] 
+		uv = tr2$edge[i, ]
+		u <- uv[1]
+		v = uv[2]
+		isexog_u <- nodeStates[u,2]==1
+		isexog_v <- nodeStates[v,2]==1
+		isregion_u <- ( nodeStates[u,1]==1)
+		isregion_v <- ( nodeStates[v,1]==1)
+		
+		if ( !is.na( region_ancestor[u] ))
+		{
+			region_ancestor[v] <- region_ancestor[u] 
+		} else if ( isregion_v ){
+			region_ancestor[v] <- v
+		}
+		
+	}
+	region_ancestors = unique( na.omit( region_ancestor ))
+	region_ancestors <- setdiff( region_ancestors, 1:Ntip(tr2))
+#~ browser()
+	region_clades = lapply( region_ancestors, function(u){
+		tr= extract.clade(tr2, u ) 
+		drop.tip( tr, tr$tip.label[ grepl(tr$tip.label, patt = '_exog') ] )
+	})
+	
+	Ti = c( tr2$sts, tr2$Ti )
+	
+	list( tres = region_clades, ancestors = region_ancestors, tmrcas = Ti[ region_ancestors] )
+}
+
 
 #' @export
 .compute_timports <- function(td){
@@ -18,7 +87,10 @@
 	
 	region <- sapply( strsplit( tr2$tip.label, '_' ), function(x) tail(x,1))
 	names(region) <- tr2$tip.label
-	region_pd <- as.phyDat(region, type ='USER' , levels = unique( region ) )
+	
+	region_levels <- c('Il', 'exog')
+	region_pd <- as.phyDat(region, type ='USER' , levels = region_levels )
+	
 	ancestral.pars(tr2, region_pd ) -> region_ap
 	#plotAnc(tr2,  region_ap, cex = 0) 
 

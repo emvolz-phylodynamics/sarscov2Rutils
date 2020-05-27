@@ -4,12 +4,7 @@
 \alias{add_ggGR_sarscov2skygrowth}
 \title{Combine growth plots for two skygrowth fits, for example comparing s614 G and D clades}
 \usage{
-add_ggGR_sarscov2skygrowth(
-  x,
-  x1,
-  date_limits = c(as.Date("2020-03-01"), NA),
-  ...
-)
+add_ggGR_sarscov2skygrowth(x, x1, date_limits = c(-Inf, Inf), ...)
 }
 \arguments{
 \item{x}{skygrowth1 fit}
