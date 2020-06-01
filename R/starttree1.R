@@ -67,7 +67,34 @@ make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
 
 #~ td = make_starting_tree( 'nl2.fasta' )
 
-
+#' Running treedater on ML trees on HPC or work stations with many cores
+#' 
+#' Collapses small edges and resolves polytomies randomly many times
+#'  
+#' @param threads number of treedater fits to run in parallel
+#' @param ncpu number of cpus to use for each treedater fit 
+#' @return a bunch of treedater trees corresponding to random resolutions of ML tree 
+#' @export 
+cutie_treedater <- function(tr, ntres = 10, threads= 2 , ncpu = 5)
+{
+  sts <- sapply( strsplit( tr$tip.label, '\\|' ), function(x){
+    as.numeric( tail(x,2)[1] )
+  })
+  names(sts) <- tr$tip.label 
+  trpl <- tr
+  # collapse small edges, make polytomies 
+  tr <- di2multi( tr, tol = 1e-5 ) 
+  # resolve polytomies randomly 
+  tres <- lapply( 1:ntres, function(i) { 
+    tr = unroot( multi2di( tr )  )  
+    tr$edge.length <- pmax( 1/29e3/5, tr$edge.length  ) #ensures that edge is >0, makes treedater fit a little nicer 
+    tr
+  })
+  tds <- parallel::mclapply( tres, function(tr){
+    dater( unroot(tr), sts[tr$tip.label], s= 29e3, omega0 = .001, numStartConditions=0, meanRateLimits = c( .0008, .0015) , ncpu = ncpu )
+  }, mc.cores = threads)
+  tds
+}
 
 #' Make starting trees and ML tree plot
 #' 

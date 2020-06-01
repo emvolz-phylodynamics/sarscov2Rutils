@@ -88,6 +88,7 @@ skygrowth0 <- function( tds , tstart = decimal_date( as.Date('2020-03-01') ), ta
 	  , R =RCI
 	  , GRmat = GR 
 	  , Rmat = Rmat 
+	  , sgs = sgs 
 	)
 	, class = 'sarscov2skygrowth' 
 	)
