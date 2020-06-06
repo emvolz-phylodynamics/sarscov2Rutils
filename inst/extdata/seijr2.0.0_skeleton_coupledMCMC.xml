@@ -55,7 +55,7 @@ name="alignment">
         <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="10.0" name="stateNode">15.0</parameter>
         <parameter id="seir.tau.t:algn" spec="parameter.RealParameter" name="stateNode">73.98393</parameter>
         <parameter id="seir.exogGrowthRate.t:algn" spec="parameter.RealParameter" name="stateNode">36.5</parameter>
-        <parameter id="seir.importRate.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10000.0">100.00</parameter>
+        <parameter id="seir.importRate.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="360.0">100.00</parameter>
         <parameter id="seir.S.t:algn" spec="parameter.RealParameter" lower="10000.0" name="stateNode" >100000.0</parameter>
         <parameter id="seir.exog.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.01</parameter>
         <parameter id="freqParameter.s:algn" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
