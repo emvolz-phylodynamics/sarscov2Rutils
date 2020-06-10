@@ -87,6 +87,7 @@ region_clades<- function(td){
 	
 	region <- sapply( strsplit( tr2$tip.label, '_' ), function(x) tail(x,1))
 	names(region) <- tr2$tip.label
+	isregion <- setNames( grepl( tr2$tip.label, patt = 'Il$' ) ,  tr2$tip.label )
 	
 	region_levels <- c('Il', 'exog')
 	region_pd <- as.phyDat(region, type ='USER' , levels = region_levels )
@@ -124,7 +125,13 @@ region_clades<- function(td){
 	tops = Ti [ ismrca_monoregion ]
 	bottoms = Ti[ exog_ancestor[ ismrca_monoregion ] ]
 	mids = (tops + bottoms)/2
-	pldf = data.frame( yplus = tops ,  yminus = bottoms, y = mids )
+	w <- sapply( which( ismrca_monoregion ), function(u){
+		if ( u < Ntip (tr2))
+			return(1)
+		tr3 = extract.clade( tr2, u )
+		sum( isregion[ tr3$tip.label ]  )
+	})
+	pldf = data.frame( yplus = tops ,  yminus = bottoms, y = mids , w = w)
 	pldf 
 }
 
@@ -136,10 +143,12 @@ region_clades<- function(td){
 	yp = do.call( cbind, lapply( tis, '[[', 'yplus' ))
 	ym = do.call( cbind, lapply( tis, '[[', 'yminus' ))
 	mi = do.call( cbind, lapply( tis, '[[', 'y' ))
+	w = do.call( cbind, lapply( tis, '[[', 'w' ))
 	
 	pldf = data.frame( y = apply( mi, MAR=1, FUN = median )
 	 , yminus = apply( ym, MAR=1, FUN = function(x) unname( quantile(x, .025)) )
 	 , yplus = apply( yp, MAR=1, FUN = function(x) unname( quantile(x, .975)) )
+	 , w = apply( w, MAR=1, FUN= median )
 	)
 	pldf <- pldf [ pldf$y > excludeBefore , ]
 	list(pldf =pldf , tis = tis )
@@ -191,7 +200,7 @@ plot_importationsHist <- function(pldf, showDates = TRUE, breaks=10 , xlab='Clus
 #' @param numpb A number of parametric bootstrap replicates for each treedater tree. 
 #' @param ncpu Number of cpus to use
 #' @param excludeBefore Removes any dates before this point (some outlier sequences merge before then (guangdong))
-#' @return A data frame that can be used for plotting etc 
+#' @return A data frame that can be used for plotting etc. *weighted_seed_date* shows the mean and CI of the seed date weighted by number of region tips descended from that node. This gives much less weight to later introductions with few descendents. 
 #' @examples
 #' \dontrun{ 
 #' PATT = 'Netherlands'
@@ -216,7 +225,7 @@ compute_timports <- function(tds, numpb = 100, ncpu = 6, excludeBefore = 2020 ){
 	pldfs <- lapply( results, '[[', 'pldf' )
 	tis <- lapply( results, '[[', 'tis' )
 	pldf <- do.call(rbind, pldfs )
-	list( pldf = pldf, tis = tis )
+	ws = apply( pldf[, c('y', 'yminus','yplus')], MAR=2, FUN=function(x) weighted.mean(x, pldf$w ))
+	list( pldf = pldf, tis = tis , weighted_seed_date = lubridate::date_decimal(ws))
 }
-
 

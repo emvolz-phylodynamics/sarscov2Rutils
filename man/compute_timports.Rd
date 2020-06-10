@@ -14,7 +14,7 @@ compute_timports(tds, numpb = 100, ncpu = 6, excludeBefore = 2020)
 \item{excludeBefore}{Removes any dates before this point (some outlier sequences merge before then (guangdong))}
 }
 \value{
-A data frame that can be used for plotting etc
+A data frame that can be used for plotting etc. *weighted_seed_date* shows the mean and CI of the seed date weighted by number of region tips descended from that node. This gives much less weight to later introductions with few descendents.
 }
 \description{
 Time of importations is taken as the midpoing on branches separating an exogenous parent and a regional daughter; the states of nodes are determined by parsimony
