@@ -3,6 +3,7 @@ library( treedater )
 library( phangorn )
 library( ggtree )
 
+#' @export 
 .mltr <-  function( fn ){
 	file.copy( fn, getwd() )
 	d <- read.dna( fn, format='fasta' ) 

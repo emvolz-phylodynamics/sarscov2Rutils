@@ -138,8 +138,13 @@ region_clades<- function(td){
 .compute_timports_pb <- function( td, numpb , ncpu = 6, overrideSearchRoot=FALSE, excludeBefore = 2020)
 {
 	library( treedater )
-	pb = parboot( td, nreps = numpb , overrideTempConstraint = FALSE, overrideSearchRoot=overrideSearchRoot, ncpu = ncpu )
-	tis = lapply( pb$trees, .compute_timports )
+	if ( numpb > 1 ){
+		pb = parboot( td, nreps = numpb , overrideTempConstraint = FALSE, overrideSearchRoot=overrideSearchRoot, ncpu = ncpu )
+		tis = lapply( pb$trees, .compute_timports )
+	} else{
+		tis = list( .compute_timports( td ) )
+	}
+	
 	yp = do.call( cbind, lapply( tis, '[[', 'yplus' ))
 	ym = do.call( cbind, lapply( tis, '[[', 'yminus' ))
 	mi = do.call( cbind, lapply( tis, '[[', 'y' ))
