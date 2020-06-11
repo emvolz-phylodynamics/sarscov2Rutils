@@ -126,7 +126,7 @@ region_clades<- function(td){
 	bottoms = Ti[ exog_ancestor[ ismrca_monoregion ] ]
 	mids = (tops + bottoms)/2
 	w <- sapply( which( ismrca_monoregion ), function(u){
-		if ( u < Ntip (tr2))
+		if ( u <= Ntip (tr2))
 			return(1)
 		tr3 = extract.clade( tr2, u )
 		sum( isregion[ tr3$tip.label ]  )
@@ -143,6 +143,8 @@ region_clades<- function(td){
 		tis = lapply( pb$trees, .compute_timports )
 	} else{
 		tis = list( .compute_timports( td ) )
+		if ( nrow ( tis[[1]] ) == 0 )
+			return( list( pldf = tis[[1]], tis = tis ) )
 	}
 	
 	yp = do.call( cbind, lapply( tis, '[[', 'yplus' ))
