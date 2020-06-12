@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" required="" version="2.6">
+
+<!--
+Attributes to overwrite: 
+see sarscov2::format_xml0
+-->
+
+
+    <data
+id="algn"
+spec="Alignment"
+name="alignment">
+	SEQUENCES
+	</data>
+
+
+    
+
+
+    
+
+
+    
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+<run id="mcmc" spec="MCMC" chainLength="10000000">
+    <state id="state" spec="State" storeEvery="5000">
+        <tree id="Tree.t:algn" spec="beast.evolution.tree.Tree" name="stateNode">
+            <trait id="dateTrait.t:algn" spec="beast.evolution.tree.TraitSet" traitname="date" value="DATE_TRAIT">
+                <taxa id="TaxonSet.algn" spec="TaxonSet">
+                    <alignment idref="algn"/>
+                </taxa>
+            </trait>
+            <taxonset idref="TaxonSet.algn"/>
+        </tree>
+        <parameter id="clockRate.c:algn" spec="parameter.RealParameter" lower="5.0E-4" name="stateNode" upper="0.005">0.0015</parameter>
+        <parameter id="kappa.s:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
+        <parameter id="seir.p_h.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.2</parameter>
+        <parameter id="seir.b.t:algn" spec="parameter.RealParameter" lower="5.0" name="stateNode">15.0</parameter>
+        <parameter id="seir.tau.t:algn" spec="parameter.RealParameter" name="stateNode">73.98393</parameter>
+        <parameter id="seir.exogGrowthRate.t:algn" spec="parameter.RealParameter" name="stateNode">36.5</parameter>
+        <parameter id="seir.importRate.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="10.0">7.0</parameter>
+        <parameter id="seir.E.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">1.0</parameter>
+        
+        <parameter id="seir.exog.t:algn" spec="parameter.RealParameter" lower="0.0" name="stateNode">0.01</parameter>
+        
+        <parameter id="seir.dlogbeta.t" spec="parameter.RealParameter" dimension="3" name="stateNode">0.0</parameter>
+        
+        <parameter id="freqParameter.s:algn" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
+    </state>
+
+    <init id="NewickTree.t:algn" spec="beast.util.TreeParser" IsLabelledNewick="true" estimate="false" initial="@Tree.t:algn" newick="START_TREE" taxa="@algn"/>
+
+    <distribution id="posterior" spec="util.CompoundDistribution">
+        <distribution id="prior" spec="util.CompoundDistribution">
+            <distribution id="PhydynSEIR.t:algn" spec="phydyn.distribution.STreeLikelihoodODE" equations="QL" minP="0.0001" stepSize="0.001" penaltyAgtY="0.0" useStateName="true">
+                <popmodel id="pdseirmodel.t:algn" spec="phydyn.model.PopModelODE">
+					                    
+                    <definition id="Definition.beta1" spec="phydyn.model.Definition" value=" beta1 = if ( t !>= SEIJR_START ) then 0.0 else ( max(0.0, b) ) "/>
+                    <definition id="Definition.betalb" spec="phydyn.model.Definition" value="betalb = if ( t !>= SEIJR_START ) then 0
+						else if (t  !>= 2020.123 ) then beta1 
+						else if (t  !>= 2020.161 ) then beta1 * exp( dlogbeta[0] )
+						else if ( t !>= 2020.199 ) then beta1 * exp( dlogbeta[0] + dlogbeta[1] )
+						else (beta1 * exp( dlogbeta[0] + dlogbeta[1] + dlogbeta[2]) ) "/>
+					<definition id="Definition.betaub" spec="phydyn.model.Definition" value="betaub = if ( t  !>= SEIJR_START) then 0
+						else if (t  !>= 2020.123 ) then beta1 * exp(  dlogbeta[0] )
+						else if (t  !>= 2020.161 ) then beta1 * exp( dlogbeta[0] + dlogbeta[1] )
+						else if ( t !>= 2020.199 ) then beta1 * exp( dlogbeta[0] + dlogbeta[1] + dlogbeta[2] )
+						else (beta1 * exp( dlogbeta[0] + dlogbeta[1] + dlogbeta[2] )) "/>
+                    <definition id="Definition.tlb" spec="phydyn.model.Definition" value=" tlb  = if (t  !>=  SEIJR_START ) then 2020.085 
+						else if ( t !>= 2020.161) then 2020.123
+						else if ( t  !>= 2020.199) then 2020.161 
+						else if ( t  !>=  2020.238) then 2020.199
+						else ( 2020.238 ) "/>
+                    <definition id="Definition.propub" spec="phydyn.model.Definition" value=" propub = max(0, min(1, (t-tlb)/ (2020.238 - 2020.199)  ) ) "/>
+                    <definition id="Definition.beta" spec="phydyn.model.Definition" value=" beta = max(0, propub * betaub + (1-propub)*betalb) "/>
+                    <definition id="Definition.2" spec="phydyn.model.Definition" value=" betaExog =  gammaExog + exogGrowthRate "/>
+                    
+					
+                    <matrixeq id="MatrixEquation.0" spec="phydyn.model.MatrixEquation" destination="Il" origin="E" type="migration">if ( t &gt; SEIJR_START ) then gamma0*E*(1-p_h) else 0.0</matrixeq>
+                    <matrixeq id="MatrixEquation.1" spec="phydyn.model.MatrixEquation" destination="Ih" origin="E" type="migration">if ( t &gt; SEIJR_START ) then gamma0*E*p_h else 0.0</matrixeq>
+                    <matrixeq id="MatrixEquation.2" spec="phydyn.model.MatrixEquation" destination="E" origin="Il" type="birth">beta*Il</matrixeq>
+                    <matrixeq id="MatrixEquation.3" spec="phydyn.model.MatrixEquation" destination="E" origin="Ih" type="birth">beta*Ih*tau </matrixeq>
+                    <matrixeq id="MatrixEquation.4" spec="phydyn.model.MatrixEquation" origin="Il" type="death">gamma1*Il</matrixeq>
+                    <matrixeq id="MatrixEquation.5" spec="phydyn.model.MatrixEquation" origin="Ih" type="death">gamma1*Ih</matrixeq>
+                    
+                    <matrixeq id="MatrixEquation.8" spec="phydyn.model.MatrixEquation" origin="infections" type="nondeme">beta*(Ih*tau+Il)</matrixeq>
+                    <matrixeq id="MatrixEquation.9" spec="phydyn.model.MatrixEquation" destination="Il" origin="exog" type="migration">importRate * Il</matrixeq>
+                    <matrixeq id="MatrixEquation.10" spec="phydyn.model.MatrixEquation" destination="exog" origin="Il" type="migration">importRate * Il</matrixeq>
+                    <matrixeq id="MatrixEquation.11" spec="phydyn.model.MatrixEquation" destination="Ih" origin="exog" type="migration">importRate * Ih</matrixeq>
+                    <matrixeq id="MatrixEquation.12" spec="phydyn.model.MatrixEquation" destination="exog" origin="Ih" type="migration">importRate * Ih</matrixeq>
+                    <matrixeq id="MatrixEquation.13" spec="phydyn.model.MatrixEquation" destination="E" origin="exog" type="migration">importRate * E</matrixeq>
+                    <matrixeq id="MatrixEquation.14" spec="phydyn.model.MatrixEquation" destination="exog" origin="E" type="migration">importRate * E</matrixeq>
+                    <matrixeq id="MatrixEquation.15" spec="phydyn.model.MatrixEquation" destination="exog" origin="exog" type="birth">betaExog * exog</matrixeq>
+                    <matrixeq id="MatrixEquation.16" spec="phydyn.model.MatrixEquation" origin="exog" type="death">gammaExog * exog</matrixeq>
+                    
+					<!--
+					> decimal_date( seq( as.Date( '2020-02-01'), as.Date(Sys.time()) , by = 14) )
+					[1] 2020.085 2020.123 2020.161 2020.199 2020.238
+					-->
+
+                    <popParams id="initValues" spec="phydyn.model.TrajectoryParameters" integrationSteps="200">
+                        <parameter id="seir.t0.t:algn" spec="parameter.RealParameter" estimate="false" name="t0">2019.7</parameter>
+                        <initialValue id="seir.E.pv.t:algn" spec="phydyn.model.ParamValue" pname="E" pvalue="@seir.E.t:algn"/>
+                        <initialValue id="seir.Il.pv.t:algnl" spec="phydyn.model.ParamValue" pname="Il">
+                            <parameter id="seir.Il.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
+                        </initialValue>
+                        <initialValue id="seir.Ih.pv.t:algn" spec="phydyn.model.ParamValue" pname="Ih">
+                            <parameter id="seir.Ih.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">1.0E-8</parameter>
+                        </initialValue>
+                        <initialValue id="seir.exog.pv.t:algn" spec="phydyn.model.ParamValue" pname="exog" pvalue="@seir.exog.t:algn"/>
+                        <initialValue id="seir.infections.pv.t:algn" spec="phydyn.model.ParamValue" pname="infections">
+                            <parameter id="seir.infections.t:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="pvalue">0.0</parameter>
+                        </initialValue>
+                    </popParams>
+                    
+                    <modelParams id="rates" spec="phydyn.model.ModelParameters">
+                        <param id="seir.gamma0.pv.t:algn" spec="phydyn.model.ParamValue" pname="gamma0">
+                            <parameter id="seir.gamma0.t:algn" spec="parameter.RealParameter" estimate="false" name="pvalue">73.0</parameter>
+                        </param>
+                        <param id="seir.gamma1.pv.t:algn" spec="phydyn.model.ParamValue" pname="gamma1">
+                            <parameter id="seir.gamma1.t:algn" spec="parameter.RealParameter" estimate="false" name="pvalue">121.667</parameter>
+                        </param>
+                        <param id="seir.gammaExog.pv.t:algn" spec="phydyn.model.ParamValue" pname="gammaExog">
+                            <parameter id="seir.gammaExog.t:algn" spec="parameter.RealParameter" estimate="false" name="pvalue">44.0</parameter>
+                        </param>
+                        <param id="seir.p_h.pv.t:algn" spec="phydyn.model.ParamValue" pname="p_h" pvalue="@seir.p_h.t:algn"/>
+                        
+                        <param id="seir.b.pv.t:algn" spec="phydyn.model.ParamValue" pname="b" pvalue="@seir.b.t:algn"/>
+                        
+                        <param id="seir.dlogbeta.pv.t" spec="phydyn.model.ParamValue" isVector='true' pname="dlogbeta" pvalue="@seir.dlogbeta.t"/> 
+						
+                        <param id="seir.tau.pv.t:algn" spec="phydyn.model.ParamValue" pname="tau" pvalue="@seir.tau.t:algn"/>
+                        <param id="seir.exogGrowthRate.pv.t:algn" spec="phydyn.model.ParamValue" pname="exogGrowthRate" pvalue="@seir.exogGrowthRate.t:algn"/>
+                        <param id="seir.importRate.pv.t:algn" spec="phydyn.model.ParamValue" pname="importRate" pvalue="@seir.importRate.t:algn"/>
+                    </modelParams>
+                </popmodel>
+                <parameter id="seir.Ne.t:algn" spec="parameter.RealParameter" estimate="false" name="Ne">0.1</parameter>
+                <treeIntervals id="STreeIntervals.t:algn" spec="STreeIntervals" tree="@Tree.t:algn"/>
+            </distribution>
+            <prior id="ClockPrior.c:algn" name="distribution" x="@clockRate.c:algn">
+                <Uniform id="Uniform.0" name="distr" upper="Infinity"/>
+            </prior>
+            <prior id="FrequenciesPrior.s:algn" name="distribution" x="@freqParameter.s:algn">
+                <Uniform id="Uniform.3" name="distr"/>
+            </prior>
+            <prior id="seir.dlogbetaPrior" name="distribution" x="@seir.dlogbeta.t">
+				<Normal id="Normal.dlogBetaPrior" name="distr">
+					<parameter id="Normal.dlogBetaPrior.mean" spec="parameter.RealParameter" estimate="false" name="mean">0.0</parameter>
+					<parameter id="Normal.dlogBetaPrior.sigma" spec="parameter.RealParameter" estimate="false" name="sigma">0.20</parameter>
+				</Normal>
+            </prior>
+            
+            <prior id="KappaPrior.s:algn" name="distribution" x="@kappa.s:algn">
+                <LogNormal id="LogNormalDistributionModel.0" name="distr">
+                    <parameter id="RealParameter.1" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+                    <parameter id="RealParameter.2" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="seir.E.prior.t:algn" name="distribution" x="@seir.E.t:algn">
+                <Exponential id="Exponential.2" name="distr">
+                    <parameter id="RealParameter.20" spec="parameter.RealParameter" lower="0.0" name="mean" upper="0.0">1.0</parameter>
+                </Exponential>
+            </prior>
+            <prior id="seir.b.prior.t:algn" name="distribution" x="@seir.b.t:algn">
+                <LogNormal id="LogNormalDistributionModel.4" name="distr">
+                    <parameter id="RealParameter.11" spec="parameter.RealParameter" lower="0.0" name="M" upper="0.0">2.7</parameter>
+                    <parameter id="RealParameter.12" spec="parameter.RealParameter" lower="0.0" name="S" upper="0.0">0.5</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="seir.exog.prior.t:algn" name="distribution" x="@seir.exog.t:algn">
+                <Exponential id="Exponential.6" name="distr">
+                    <parameter id="RealParameter.24" spec="parameter.RealParameter" lower="0.0" name="mean" upper="0.0">1.0</parameter>
+                </Exponential>
+            </prior>
+            <prior id="seir.exogGrowthRate.prior.t:algn" name="distribution" x="@seir.exogGrowthRate.t:algn">
+                <LogNormal id="LogNormalDistributionModel.6" name="distr">
+                    <parameter id="RealParameter.15" spec="parameter.RealParameter" lower="0.0" name="M" upper="0.0">3.6</parameter>
+                    <parameter id="RealParameter.16" spec="parameter.RealParameter" lower="0.0" name="S" upper="0.0">0.25</parameter>
+                </LogNormal>
+            </prior>
+            <prior id="seir.importRate.prior.t:algn" name="distribution" x="@seir.importRate.t:algn">
+                <Exponential id="Exponential.1" name="distr">
+                    <parameter id="RealParameter.17" spec="parameter.RealParameter" lower="0.0" name="mean" upper="0.0">10.0</parameter>
+                </Exponential>
+            </prior>
+            <prior id="seir.p_h.prior.t:algn" name="distribution" x="@seir.p_h.t:algn">
+                <Beta id="Beta.0" name="distr">
+                    <parameter id="RealParameter.9" spec="parameter.RealParameter" lower="0.0" name="alpha" upper="0.0">50.0</parameter>
+                    <parameter id="RealParameter.10" spec="parameter.RealParameter" lower="0.0" name="beta" upper="0.0">200.0</parameter>
+                </Beta>
+            </prior>
+            <prior id="seir.tau.prior.t:algn" name="distribution" x="@seir.tau.t:algn">
+                <LogNormal id="LogNormalDistributionModel.5" name="distr">
+                    <parameter id="RealParameter.13" spec="parameter.RealParameter" lower="0.0" name="M" upper="0.0">4.3</parameter>
+                    <parameter id="RealParameter.14" spec="parameter.RealParameter" lower="0.0" name="S" upper="0.0">0.1</parameter>
+                </LogNormal>
+            </prior>
+        </distribution>
+        <distribution id="likelihood" spec="util.CompoundDistribution" useThreads="true">
+            <distribution id="treeLikelihood.algn" spec="ThreadedTreeLikelihood" data="@algn" tree="@Tree.t:algn">
+                <siteModel id="SiteModel.s:algn" spec="SiteModel">
+                    <parameter id="mutationRate.s:algn" spec="parameter.RealParameter" estimate="false" name="mutationRate">1.0</parameter>
+                    <parameter id="gammaShape.s:algn" spec="parameter.RealParameter" estimate="false" name="shape">1.0</parameter>
+                    <parameter id="proportionInvariant.s:algn" spec="parameter.RealParameter" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+                    <substModel id="hky.s:algn" spec="HKY" kappa="@kappa.s:algn">
+                        <frequencies id="estimatedFreqs.s:algn" spec="Frequencies" frequencies="@freqParameter.s:algn"/>
+                    </substModel>
+                </siteModel>
+                <branchRateModel id="StrictClock.c:algn" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate.c:algn"/>
+            </distribution>
+        </distribution>
+    </distribution>
+
+    <operator id="StrictClockRateScaler.c:algn" spec="ScaleOperator" parameter="@clockRate.c:algn" scaleFactor="0.75" weight="3.0"/>
+
+    <operator id="strictClockUpDownOperator.c:algn" spec="UpDownOperator" scaleFactor="0.75" weight="3.0">
+        <up idref="clockRate.c:algn"/>
+        <down idref="Tree.t:algn"/>
+    </operator>
+
+    <operator id="KappaScaler.s:algn" spec="ScaleOperator" parameter="@kappa.s:algn" scaleFactor="0.5" weight="0.1"/>
+    
+
+
+    <operator id="PhydynSEIRTreeScaler.t:algn" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree.t:algn" weight="3.0"/>
+    <operator id="PhydynSEIRTreeRootScaler.t:algn" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree.t:algn" weight="3.0"/>
+    <operator id="PhydynSEIRUniformOperator.t:algn" spec="Uniform" tree="@Tree.t:algn" weight="30.0"/>
+    <operator id="PhydynSEIRSubtreeSlide.t:algn" spec="SubtreeSlide" tree="@Tree.t:algn" weight="15.0"/>
+    <operator id="PhydynSEIRNarrow.t:algn" spec="Exchange" tree="@Tree.t:algn" weight="15.0"/>
+    <operator id="PhydynSEIRWide.t:algn" spec="Exchange" isNarrow="false" tree="@Tree.t:algn" weight="3.0"/>
+    <operator id="PhydynSEIRWilsonBalding.t:algn" spec="WilsonBalding" tree="@Tree.t:algn" weight="3.0"/>
+
+	<operator id="seir.dlogbeta.operator" spec="RealRandomWalkOperator" parameter="@seir.dlogbeta.t" useGaussian="true" weight="3.0" windowSize="0.1"/>
+
+    <operator id="seir.p_h.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.p_h.t:algn" useGaussian="true" weight="1.0" windowSize="0.01"/>
+
+    <operator id="seir.b.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.b.t:algn" useGaussian="true" weight="1.0" windowSize="5.0"/>
+
+    <operator id="seir.tau.operator.t:algn" spec="ScaleOperator" parameter="@seir.tau.t:algn" scaleFactor="0.75" weight="1.0"/>
+
+    <operator id="seir.exogGrowthRate.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.exogGrowthRate.t:algn" useGaussian="true" weight="1.0" windowSize="5.0"/>
+
+    <operator id="seir.importRate.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.importRate.t:algn" useGaussian="true" weight="1.0" windowSize="1.0"/>
+
+    <operator id="seir.E.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.E.t:algn" useGaussian="true" weight="1.0" windowSize="0.15"/>
+
+
+    <operator id="seir.exog.operator.t:algn" spec="RealRandomWalkOperator" parameter="@seir.exog.t:algn" useGaussian="true" weight="1.0" windowSize="0.05"/>
+
+    <operator id="FrequenciesExchanger.s:algn" spec="DeltaExchangeOperator" delta="0.01" weight="0.1">
+        <parameter idref="freqParameter.s:algn"/>
+    </operator>
+
+    <logger id="tracelog" spec="Logger" fileName="algn.log" logEvery="1000" model="@posterior" sanitiseHeaders="true" sort="smart">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="treeLikelihood.algn"/>
+        <log id="TreeHeight.t:algn" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree.t:algn"/>
+        <log idref="clockRate.c:algn"/>
+        <log idref="kappa.s:algn"/>
+        <log idref="PhydynSEIR.t:algn"/>
+        <log idref="seir.p_h.t:algn"/>
+        <log idref="seir.b.t:algn"/>
+        <log idref="seir.tau.t:algn"/>
+        <log idref="seir.exogGrowthRate.t:algn"/>
+        <log idref="seir.importRate.t:algn"/>
+        <log idref="seir.E.t:algn"/>
+        <log idref="seir.exog.t:algn"/>
+        <log idref="seir.dlogbeta.t"/>
+        <log idref="freqParameter.s:algn"/>
+    </logger>
+
+    <logger id="screenlog" spec="Logger" logEvery="1000">
+        <log idref="posterior"/>
+        <log idref="likelihood"/>
+        <log idref="prior"/>
+        <log idref="PhydynSEIR.t:algn"/>
+        <log idref="seir.dlogbeta.t"/>
+    </logger>
+
+    <logger id="treelog.t:algn" spec="Logger" fileName="algn.trees" logEvery="1000" mode="tree">
+        <log id="TreeWithMetaDataLogger.t:algn" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree.t:algn"/>
+    </logger>
+
+    <logger id="popTrajLog" spec="Logger" fileName="seir.algn.traj" logEvery="10000">
+        <log id="trajectoryLogger" spec="phydyn.loggers.TrajectoryLogger" pointFrequency="1" popModel="@pdseirmodel.t:algn" logrates="all"/>
+    </logger>
+
+    <operatorschedule id="OperatorSchedule" spec="OperatorSchedule"/>
+
+</run>
+
+</beast>
