@@ -2,6 +2,7 @@
 
 S3method(plot,sarscov2skygrowth)
 export(.compute_timports)
+export(.mltr)
 export(GMRF_SEIJR_plot_Rt)
 export(GMRF_SEIJR_plot_daily_inf)
 export(SEIJR_plot_Rt)

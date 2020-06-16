@@ -15,6 +15,8 @@
 }
 #~ y = .seq_format ( d )
 
+
+
 #' Generates a runnable XML by inserting sequence data, a starting tree, tip dates, and a model start time to a XML skeleton
 #'
 #' The names of the sequence data and trees must match and must be in the standard form for inferring tip dates. The XML skeleton must have these entries to be overwritten: 
@@ -22,6 +24,7 @@
 #' START_TREE
 #' DATE_TRAIT
 #' SEIJR_START
+#' SUSC_SIZE 
 #' 
 #' A XML file will be generated for each starting tree provided 
 #' 
@@ -29,9 +32,10 @@
 #' @param fastafn The file name of the sequence data in fasta format 
 #' @param treefn The file name of the newick format starting trees. 
 #' @param start The numeric date when the model dynamics (SEIJR) will initiate 
+#' @param susc_size The initial number of susceptible, replaces SUSC_SIZE in xml, also sets scale for exponential size prior; supported in seijr0.1.3_skeleton.xml
 #' @return Character string of runnable xml. Individual XMLs for each starting tree will be written to disk 
 #' @export 
-format_xml0 <- function( xmlfn , fastafn, treefn, start = 2020.085 ){
+format_xml0 <- function( xmlfn , fastafn, treefn, start = 2020.085, susc_size = NULL ){
 	library( ape )
 	cat( paste( 'Setting start time of seijr dynamics to be', start , '\n'))
 	
@@ -63,13 +67,15 @@ format_xml0 <- function( xmlfn , fastafn, treefn, start = 2020.085 ){
 		xk1 = gsub( xk0, pattern = 'DATE_TRAIT', replacement = datedata )
 		xk2  = gsub( xk1, pattern='SEIJR_START', replacement= as.character(start) )
 		xk3 = gsub( xk2, pattern='SEQUENCES', replacement = seqdata )
+		if (!is.null(susc_size))
+			xk4 = gsub( xk3, pattern='SUSC_SIZE', replacement = susc_size )
 		
 		if ( !grepl( pattern = '\\.xml$', xmlofn )  )
-			writeLines( xk3, con =  paste0( xmlofn, '.', k, '.xml' )  )
+			writeLines( xk4, con =  paste0( xmlofn, '.', k, '.xml' )  )
 		else 
-			writeLines( xk3, con =  gsub( pattern = '\\.xml$', replacement = paste0('\\.',k,'\\.xml'), xmlofn ) )
+			writeLines( xk4, con =  gsub( pattern = '\\.xml$', replacement = paste0('\\.',k,'\\.xml'), xmlofn ) )
 	}
-	invisible( xk3 )
+	invisible( xk4 )
 }
 
 

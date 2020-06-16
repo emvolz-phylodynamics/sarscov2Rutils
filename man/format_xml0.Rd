@@ -4,7 +4,7 @@
 \alias{format_xml0}
 \title{Generates a runnable XML by inserting sequence data, a starting tree, tip dates, and a model start time to a XML skeleton}
 \usage{
-format_xml0(xmlfn, fastafn, treefn, start = 2020.085)
+format_xml0(xmlfn, fastafn, treefn, start = 2020.085, susc_size = NULL)
 }
 \arguments{
 \item{xmlfn}{The file name of the XML skeleton}
@@ -14,6 +14,8 @@ format_xml0(xmlfn, fastafn, treefn, start = 2020.085)
 \item{treefn}{The file name of the newick format starting trees.}
 
 \item{start}{The numeric date when the model dynamics (SEIJR) will initiate}
+
+\item{susc_size}{The initial number of susceptible, replaces SUSC_SIZE in xml, also sets scale for exponential size prior; supported in seijr0.1.3_skeleton.xml}
 }
 \value{
 Character string of runnable xml. Individual XMLs for each starting tree will be written to disk
@@ -24,6 +26,7 @@ SEQUENCES
 START_TREE
 DATE_TRAIT
 SEIJR_START
+SUSC_SIZE
 }
 \details{
 A XML file will be generated for each starting tree provided
