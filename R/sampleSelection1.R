@@ -40,17 +40,13 @@ region_sampler1 <- function( md
 	{
 	    ssts = sort(sts)
 		N <- length(sts)
+		ibins = unique(floor(seq(2, N, length = n-1)))
+      		keep <- c(names(ssts)[1])
+     		for (k in 2:(n-1)) {
+        		keep <- c(keep, sample(names(ssts)[ibins[k - 1]:(ibins[k]-1)], 
+                               size = 1))
+      		}
 		
-		ibins = unique( floor(seq( 2, N-1, length = n-1)) )
-		
-		
-		keep <- c( names(ssts)[1])
-		for (k in 2:(n-1)) {
-			keep <- c(keep
-			 , sample(names(ssts)[ibins[k-1]:ibins[k]]
-				, size = 1)
-			)
-		}
 		
 		keep <- c( keep, tail(names(ssts),1) )
 	} else {
