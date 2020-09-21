@@ -224,19 +224,27 @@ exog_sampler2 <- function(
 #' @param regiontips vector of sequence id
 #' @param exogtips vector of sequence id
 #' @param metadata data frame with gisaid metadata 
+#' @param useBiostrings set TRUE to use Biostrings::readDNAStringSet - more efficient for large alignments 
 #' @export
-prep_tip_labels_seijr <- function( algnfn , outfn , regiontips, exogtips, metadata ){
+prep_tip_labels_seijr <- function( algnfn , outfn , regiontips, exogtips, metadata, useBiostrings=FALSE ){
 	md = metadata 
+	if(useBiostrings==TRUE){
+	library(Biostrings)
+	d <- as.DNAbin(readDNAStringSet(algnfn))
+	s = intersect(c(regiontips, exogtips), names(d))
+	dd=d[s]
+	} else {
 	d = read.dna( algnfn, 'fasta' )
 	s= intersect( c( regiontips, exogtips ) , rownames(d))
+	dd=d[s, ]
+	}
+	nms = names(dd)
 	.md <- md [ match( s, md$seqName ) , ]
 	sts <- setNames( lubridate::decimal_date( lubridate::ymd( as.character( .md$sampleDate))), .md$seqName ) 
-	dd = d[s, ]
-	nms = rownames(dd)
 	demes <- setNames( rep( 'exog', length( nms ) ), nms )
 	demes [ nms %in% regiontips ] <- 'Il'
 	nms =  paste(sep = "|", nms, sts[nms], paste0("_",  demes[nms]))
-	rownames(dd)  <- nms
+	names(dd)  <- nms
 	write.dna( dd, file=outfn, format='fasta' )
 	invisible( dd )
 }
