@@ -10,7 +10,7 @@ library( ggtree )
 	#fn = basename( path_to_align )
 	#tdir = tempdir() 
 	#file.copy( fn, tdir ) 
-	success = system( paste0( 'iqtree -redo -m HKY -s ', fn ), intern=FALSE  )
+	success = system( paste0( 'iqtree -nt AUTO -redo -m HKY -s ', fn ), intern=FALSE  )
 	if ( success != 0 ){
 		stop('iqtree problem. Is it installed? ')
 	}
@@ -74,9 +74,10 @@ make_starting_tree = function( fn , treeofn = 'startTree.nwk', ncpu = 4){
 #'  
 #' @param threads number of treedater fits to run in parallel
 #' @param ncpu number of cpus to use for each treedater fit 
+#' @param meanRateLimits passed to treedater::dater
 #' @return a bunch of treedater trees corresponding to random resolutions of ML tree 
 #' @export 
-cutie_treedater <- function(tr, ntres = 10, threads= 2 , ncpu = 5)
+cutie_treedater <- function(tr, ntres = 10, threads= 2 , ncpu = 5,  meanRateLimits = c( .0008, .0015) )
 {
   sts <- sapply( strsplit( tr$tip.label, '\\|' ), function(x){
     as.numeric( tail(x,2)[1] )
@@ -92,7 +93,7 @@ cutie_treedater <- function(tr, ntres = 10, threads= 2 , ncpu = 5)
     tr
   })
   tds <- parallel::mclapply( tres, function(tr){
-    dater( unroot(tr), sts[tr$tip.label], s= 29e3, omega0 = .001, numStartConditions=0, meanRateLimits = c( .0008, .0015) , ncpu = ncpu )
+    dater( unroot(tr), sts[tr$tip.label], s= 29e3, omega0 = .001, numStartConditions=0, meanRateLimits = meanRateLimits, ncpu = ncpu )
   }, mc.cores = threads)
   tds
 }

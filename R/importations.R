@@ -10,7 +10,7 @@
 #' Extact all clades in given tree descended from nodes with high confidece of being within region (parsimony)
 #'
 #' @export
-region_clades<- function(td){
+region_clades<- function(td, type = c('ACCTRAN', 'MPR')){
 	library (ape )
 	library( treedater )
 	library( phangorn )
@@ -28,13 +28,13 @@ region_clades<- function(td){
 		tr2$Ti <-  nel [ (Ntip(tr2)+1) : (Ntip(tr2)+Nnode(tr2) ) ]
 	}
 	
-	region <- sapply( strsplit( tr2$tip.label, '_' ), function(x) tail(x,1))
+	region <- sapply( strsplit( tr2$tip.label, '_|\\|'), function(x) tail(x,1))
 	names(region) <- tr2$tip.label
 	
 	region_levels <- c('Il', 'exog')
 	region_pd <- as.phyDat(region, type ='USER' , levels = region_levels )
 	
-	ancestral.pars(tr2, region_pd ) -> region_ap
+	ancestral.pars(tr2, region_pd , type = type[1] ) -> region_ap
 	#plotAnc(tr2,  region_ap, cex = 0) 
 
 	nodeStates = ns <- t( sapply(  subset(region_ap, select = 1, site.pattern = TRUE), as.numeric ) )
@@ -45,7 +45,7 @@ region_clades<- function(td){
 	
 	region_ancestor = rep( NA, Nnode(tr2) + Ntip( tr2 ))
 	
-	for ( k in 1:length( iedge )){
+	for ( k in 1:length( iedge )){ #preorder traversal 
 		i <- iedge[k] 
 		uv = tr2$edge[i, ]
 		u <- uv[1]
@@ -68,13 +68,97 @@ region_clades<- function(td){
 #~ browser()
 	region_clades = lapply( region_ancestors, function(u){
 		tr= extract.clade(tr2, u ) 
-		drop.tip( tr, tr$tip.label[ grepl(tr$tip.label, patt = '_exog') ] )
+		drop.tip( tr, tr$tip.label[ grepl(tr$tip.label, patt = 'exog$') ] )
 	})
 	
 	Ti = c( tr2$sts, tr2$Ti )
 	
 	list( tres = region_clades, ancestors = region_ancestors, tmrcas = Ti[ region_ancestors] )
 }
+
+#' Extact all clades in given tree descended from nodes with high confidece of being within region (parsimony)
+#' 
+#' Can specify parsimony method (acctrans by default)
+#'
+#' @export
+region_clades2 <- function(td, type = c('ACCTRAN', 'MPR')){
+	library (ape )
+	library( treedater )
+	library( phangorn )
+	tr2 <- td ; class(tr2) = 'phylo'
+	tr2$tip.label <- unname( tr2$tip.label ) 
+	
+	
+	if (! ( 'sts' %in% names(tr2))){
+		sts = as.numeric( sapply( strsplit( tr2$tip.label, '\\|'), function(x) tail(x, 2)[1] ) ) 
+		tr2$sts = sts 
+	}
+	if (! ('Ti' %in% names(tr2) ) ){
+		nel = node.depth.edgelength( tr2 ) 
+		nel <- nel - max(nel) + max( tr2$sts )
+		tr2$Ti <-  nel [ (Ntip(tr2)+1) : (Ntip(tr2)+Nnode(tr2) ) ]
+	}
+	
+	region <- sapply( strsplit( tr2$tip.label, '_|\\|'), function(x) tail(x,1))
+	names(region) <- tr2$tip.label
+	
+	region_levels <- c('Il', 'exog')
+	region_pd <- as.phyDat(region, type ='USER' , levels = region_levels )
+	
+	ancestral.pars(tr2, region_pd , type = type[1] ) -> region_ap
+	#plotAnc(tr2,  region_ap, cex = 0) 
+
+	nodeStates = ns <- t( sapply(  subset(region_ap, select = 1, site.pattern = TRUE), as.numeric ) )
+	iedge =  postorder( tr2 )
+	
+	ismrca_region = rep(FALSE, Nnode(tr2) + Ntip( tr2 ))
+	rootnode = tr2$edge[tail(iedge,1),1]
+	
+	#region_ancestor 
+	clade_mrca = rep( FALSE, Nnode(tr2) + Ntip( tr2 ))
+	
+	if ( nodeStates[rootnode,1]==1 )
+		clade_mrca[rootnode] <- TRUE 
+	
+	#postorder traversal 
+	for ( k in 1:length( iedge )){ 
+		i <- iedge[k] 
+		uv = tr2$edge[i, ]
+		u <- uv[1]
+		v = uv[2]
+		isexog_u <- nodeStates[u,2]==1
+		isexog_v <- nodeStates[v,2]==1
+		isregion_u <- ( nodeStates[u,1]==1)
+		isregion_v <- ( nodeStates[v,1]==1)
+		
+		if ( (!isregion_u) & isregion_v & (v>Ntip(tr2)))
+			clade_mrca[v] <- TRUE 
+		
+	}
+	clade_mrcas <- which( clade_mrca ) 
+	region_clades = lapply( clade_mrcas, function(u){
+		tr= extract.clade(tr2, u ) 
+		drop.tip( tr, tr$tip.label[ grepl(tr$tip.label, patt = 'exog$') ] )
+	})
+	# deduplicate overlapping clades 
+	region_clades2 <- list() 
+	for ( k in 1:length(region_clades) ){
+		tr <- region_clades[[k]]
+		for (l in (1:length(region_clades))[-k] ){
+			tr1 <- region_clades[[l]] 
+			if ( Ntip ( tr1 ) < Ntip( region_clades[[k]] )){
+				todrop <- intersect( tr$tip.label, tr1$tip.label )
+				tr <- drop.tip( tr, todrop )
+			}
+		}
+		region_clades2[[k]] <- tr 
+	}
+	
+	Ti = c( tr2$sts, tr2$Ti )
+	list( tres = region_clades2, ancestors = clade_mrcas, tmrcas = Ti[ clade_mrcas ] )
+}
+
+
 
 
 #' @export
