@@ -136,22 +136,24 @@ make_starting_trees <- function(  fastafn, treeoutfn='startTrees.nwk' , plotout=
   })
   
   if(!is.null(plotout)){
-    #trpl$edge.length <- pmax( 1e-6, trpl$edge.length / 29e3 )
     library( phangorn )
     library( ggtree )
-    trroot <- tryCatch( { 
-		root(trpl, node=phangorn::getRoot(tds[[1]]$intree)) # seems to raise error some times 
-	} , error = function(e){
-		root(trpl, node=which.min(tds[[1]]$sts)  )
-	})
-    treedata <- sapply(strsplit(trroot$tip.label, "_"), tail, 1)
-    treedata <- data.frame(tip.label=trroot$tip.label,region=treedata %in% regionDemes, row.names=NULL, stringsAsFactors = FALSE)
-    treedata$size[ !treedata$region ] <- 0
-    treedata$region[ !treedata$region ] <- NA
+    curroot <- phangorn::getRoot(trpl)
+    if(curroot!=phangorn::getRoot(tds[[1]]$intree))
+      trroot <- root(trpl, node = phangorn::getRoot(tds[[1]]$intree))
+    else trroot <- trpl
+    treedata <- sapply(strsplit(trroot$tip.label, "_"), 
+                       tail, 1)
+    treedata <- data.frame(tip.label = trroot$tip.label, 
+                           region = treedata %in% regionDemes, row.names = NULL, 
+                           stringsAsFactors = FALSE)
+    treedata$size[!treedata$region] <- 0
+    treedata$region[!treedata$region] <- NA
     plt <- ggtree(trroot)
-    plt <- plt %<+% treedata +
-      geom_tippoint(aes(color = region), na.rm=TRUE, show.legend=FALSE, size =1.25) + theme_tree2( legend.position = "none" )
-    ggsave(plt, file = plotout , width = 4, height=7)
+    plt <- plt %<+% treedata + geom_tippoint(aes(color = region), 
+                                             na.rm = TRUE, show.legend = FALSE, size = 1.25) + 
+      theme_tree2(legend.position = "none")
+    ggsave(plt, file = plotout, width = 4, height = 7)
   }
   
   outtrees = lapply( tds, function(x){
