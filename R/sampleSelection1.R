@@ -232,19 +232,26 @@ prep_tip_labels_seijr <- function( algnfn , outfn , regiontips, exogtips, metada
 	library(Biostrings)
 	d <- as.DNAbin(readDNAStringSet(algnfn))
 	s = intersect(c(regiontips, exogtips), names(d))
-	dd=d[s]
-	} else {
-	d = read.dna( algnfn, 'fasta' )
-	s= intersect( c( regiontips, exogtips ) , rownames(d))
-	dd=d[s, ]
-	}
-	nms = names(dd)
 	.md <- md [ match( s, md$seqName ) , ]
 	sts <- setNames( lubridate::decimal_date( lubridate::ymd( as.character( .md$sampleDate))), .md$seqName ) 
+	dd=d[s]	
+	nms = names(dd)
 	demes <- setNames( rep( 'exog', length( nms ) ), nms )
 	demes [ nms %in% regiontips ] <- 'Il'
 	nms =  paste(sep = "|", nms, sts[nms], paste0("_",  demes[nms]))
 	names(dd)  <- nms
+	} else {
+	d = read.dna( algnfn, 'fasta' )
+	s= intersect( c( regiontips, exogtips ) , rownames(d))
+	.md <- md [ match( s, md$seqName ) , ]
+	sts <- setNames( lubridate::decimal_date( lubridate::ymd( as.character( .md$sampleDate))), .md$seqName ) 
+	dd = d[s, ]
+	nms = rownames(dd)
+	demes <- setNames( rep( 'exog', length( nms ) ), nms )
+	demes [ nms %in% regiontips ] <- 'Il'
+	nms =  paste(sep = "|", nms, sts[nms], paste0("_",  demes[nms]))
+	rownames(dd)  <- nms
+	}
 	write.dna( dd, file=outfn, format='fasta' )
 	invisible( dd )
 }
