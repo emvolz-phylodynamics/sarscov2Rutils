@@ -1,5 +1,5 @@
-## sarscov2
-Scripts to support preparation and analysis of SARS CoV 2 analyses   
+# sarscov2
+Scripts to support preparation and analysis of SARS CoV 2 phylogenetic analyses   
 **Version:** 0.1.4  
 **Date:** 2020-06-17  
 **Code Contributors:** Erik M Volz, Manon Ragonnet, David Jorgensen, Lily Geidelberg, Olivia Boyd, Robert Johnson, Igor Siveroni  
