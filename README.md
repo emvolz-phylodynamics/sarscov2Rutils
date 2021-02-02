@@ -13,6 +13,7 @@ Scripts to support preparation and analysis of SARS CoV 2 analyses
 **Tested OS:** Windows 10.0, MacOS 10.14, Linux CentOS 7  
 **Tested dependencies:** ape 5.4, treedater 0.5.0, lubridate 1.7.9, ggtree 1.16.6, ggplot2 3.3.2, treeio 1.8.2, knitr 1.29, coda 0.19-3, phangorn 2.5.5, Hmisc 4.4-0, yaml 2.2.1, glue 1.4.1  
 
+Certain functions in this R package also require [IQ-TREE](iqtree.org) (version 1.6.12-Windows tested) and [MAFFT](https://mafft.cbrc.jp/alignment/software/) (version 7.450-win64 tested) and interact with these programs via system calls from R. Adding these programs to PATH is reccomended, or modifications can be made to these functions.
 
 ### Installation
 
