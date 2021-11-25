@@ -21,3 +21,5 @@ Download [tar file](https://github.com/emvolz-phylodynamics/sarscov2Rutils/blob/
 ```install.packages(path_to_tar_file, repos = NULL, type="source")```  
 
 Typical install time \< 1 minute (not incluing R installation and package dependencies).
+
+[![DOI](https://zenodo.org/badge/335401763.svg)](https://zenodo.org/badge/latestdoi/335401763)
