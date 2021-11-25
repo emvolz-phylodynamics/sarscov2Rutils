@@ -1,5 +1,6 @@
 # sarscov2
 Scripts to support preparation and analysis of SARS CoV 2 phylogenetic analyses   
+[![DOI](https://zenodo.org/badge/335401763.svg)](https://zenodo.org/badge/latestdoi/335401763)
 **Version:** 0.1.4  
 **Date:** 2020-06-17  
 **Code Contributors:** Erik M Volz, Manon Ragonnet, David Jorgensen, Lily Geidelberg, Olivia Boyd, Robert Johnson, Igor Siveroni  
@@ -22,4 +23,3 @@ Download [tar file](https://github.com/emvolz-phylodynamics/sarscov2Rutils/blob/
 
 Typical install time \< 1 minute (not incluing R installation and package dependencies).
 
-[![DOI](https://zenodo.org/badge/335401763.svg)](https://zenodo.org/badge/latestdoi/335401763)
