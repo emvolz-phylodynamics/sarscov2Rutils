@@ -1,5 +1,6 @@
 # sarscov2
 Scripts to support preparation and analysis of SARS CoV 2 phylogenetic analyses   
+
 [![DOI](https://zenodo.org/badge/335401763.svg)](https://zenodo.org/badge/latestdoi/335401763)
 
 **Version:** 0.1.4  
