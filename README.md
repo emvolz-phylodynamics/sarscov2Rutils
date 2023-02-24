@@ -1,5 +1,8 @@
-# sarscov2
-Scripts to support preparation and analysis of SARS CoV 2 phylogenetic analyses   
+# sarscov2Rutils
+Scripts to support preparation and analysis of SARS CoV 2 phylogenetic analyses.   
+
+*Archived version of sarscov2Rutils package as used for the production of skyline plots and importation dates for the paper 'Saudi Arabian SARS-CoV-2 genomes implicate a mutant Nucleoplasmid protein in modulating host interactions and increased viral load in COVID-19 patients'*
+
 
 [![DOI](https://zenodo.org/badge/335401763.svg)](https://zenodo.org/badge/latestdoi/335401763)
 
